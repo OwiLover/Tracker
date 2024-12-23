@@ -70,8 +70,6 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
         label.numberOfLines = 2
         label.textColor = .ypWhiteConstant
         
-        print(font.lineHeight)
-        
         let desiredLineHeight = 18.0
         let originalLineHeight = font.lineHeight
         let spacingValue = desiredLineHeight - originalLineHeight

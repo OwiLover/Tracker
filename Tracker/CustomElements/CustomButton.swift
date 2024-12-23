@@ -16,7 +16,6 @@ final class CustomButton: UIButton {
         
         self.setTitleColor(.ypWhite, for: .normal)
         self.setTitleColor(.ypWhiteConstant, for: .disabled)
-//        self.color
         
         self.backgroundColor = .ypBlack
         self.layer.cornerRadius = 16

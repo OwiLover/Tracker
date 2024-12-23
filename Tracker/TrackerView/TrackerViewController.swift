@@ -276,8 +276,6 @@ extension TrackerViewController: TrackerViewCollectionHelperDelegate {
         
         let dictionary = TrackerRecordDictionary(trackerRecords: records)
         
-        print(dictionary)
-        
         trackerCollectionViewHelper?.updateElementRecords(elementRecordDictionary: dictionary)
     }
 }

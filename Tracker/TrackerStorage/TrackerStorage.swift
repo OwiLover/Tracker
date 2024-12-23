@@ -31,6 +31,7 @@ final class TrackerStorage: TrackerStorageProtocol {
         let date = Date()
         return [TrackerRecord(id: 1, date: calendar.date(byAdding: .day, value: -4, to: date) ?? date), TrackerRecord(id: 1, date: calendar.date(byAdding: .day, value: -3, to: date) ?? date), TrackerRecord(id: 1, date: date)]
     }()
+    
     private var completedTrackerIds: Set<UInt32> = [1]
     
 //    MARK: id начинается не с 0 в связи с тем, что для тестов заранее уже были придуманы трекеры выше
@@ -72,8 +73,6 @@ final class TrackerStorage: TrackerStorageProtocol {
         
         NotificationCenter.default.post(name: TrackerStorage.didAddTracker, object: self, userInfo: ["Tracker": tracker])
     }
-    
-
     
     func markTrackerAsCompleted(id: UInt32) {
         if !completedTrackerIds.contains(id) {

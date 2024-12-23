@@ -66,7 +66,6 @@ final class TrackerViewCollectionHelper: NSObject, UICollectionViewDelegate, UIC
     func reloadCollection(newElements: [TrackerCategory], isCurrentDay: Bool) {
         elements = newElements
         self.isCurrentDay = isCurrentDay
-        print(isCurrentDay)
         self.collectionView.reloadData()
     }
     

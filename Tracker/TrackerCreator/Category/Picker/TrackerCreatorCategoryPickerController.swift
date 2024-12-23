@@ -108,8 +108,6 @@ final class TrackerCreatorCategoryPickerController: UIViewController {
         setEmptyIconImageView()
         setCategoryTableView()
         
-        print(trackerStorage.categoriesArray)
-        
         trackerStorage.categoriesArray.isEmpty ? showCategoriesAreEmpty() : showCategoryTableView()
         
         let categories = trackerStorage.categoriesArray.map { $0.category }

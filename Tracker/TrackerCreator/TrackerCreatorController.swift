@@ -430,13 +430,11 @@ extension TrackerCreatorController: TrackerCreatorDatePickerDelegate {
     func receivePickedDays(days: [(dayOfWeekNum: Int, nameOfDay: String)]) {
         daysOfWeekPicked = days.map({$0.dayOfWeekNum})
         
-        print(daysOfWeekPicked)
-        
         tableView.beginUpdates()
         let cells = tableView.visibleCells
         
         guard let cell = cells.first(where: {$0.textLabel?.text == TableViewHeaderNames.tableViewScheduleCell.rawValue}) else { return }
-        print(days.count)
+
         if days.count == 7 {
             cell.detailTextLabel?.text = "Каждый день"
         } else {

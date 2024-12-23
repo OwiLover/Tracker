@@ -7,7 +7,7 @@
 
 import Foundation
 
-class CustomSpacing {
+struct CustomSpacing {
     let leftInset: CGFloat
     let rightInset: CGFloat
     let topInset: CGFloat
