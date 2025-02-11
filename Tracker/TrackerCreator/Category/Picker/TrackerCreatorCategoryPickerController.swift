@@ -19,7 +19,9 @@ final class TrackerCreatorCategoryPickerController: UIViewController {
     
     private weak var delegate: TrackerCreatorCategoryPickerDelegate?
     
-    private let categoryTableView: UITableView = {
+    private var tableViewHelper: TrackerCreatorTableViewHelper? = nil
+    
+    private lazy var categoryTableView: UITableView = {
         let tableView = UITableView()
         tableView.backgroundColor = .none
         tableView.tintColor = .ypBlack
@@ -32,9 +34,7 @@ final class TrackerCreatorCategoryPickerController: UIViewController {
         return tableView
     }()
     
-    private var tableViewHelper: TrackerCreatorTableViewHelper? = nil
-    
-    private let createButton: CustomButton = {
+    private lazy var createButton: CustomButton = {
        let button = CustomButton()
         
         button.setTitle("Добавить категорию", for: .normal)
@@ -44,7 +44,7 @@ final class TrackerCreatorCategoryPickerController: UIViewController {
         return button
     }()
     
-    private let emptyCategoryLabel: UILabel = {
+    private lazy var emptyCategoryLabel: UILabel = {
         let label = UILabel()
         label.text = "Привычки и события можно\nобъединить по смыслу"
         label.textAlignment = .center
@@ -55,12 +55,12 @@ final class TrackerCreatorCategoryPickerController: UIViewController {
         return label
     }()
     
-    private let emptyIconImageView: UIImageView = {
+    private lazy var emptyIconImageView: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "TrackerEmptyIcon"))
         return imageView
     }()
     
-    private let iconAndLabelStackView: UIStackView = {
+    private lazy var iconAndLabelStackView: UIStackView = {
        let stackView = UIStackView()
         
         stackView.isHidden = true
@@ -72,14 +72,14 @@ final class TrackerCreatorCategoryPickerController: UIViewController {
         return stackView
     }()
     
-    private let freeSpaceView: UIView = {
+    private lazy var freeSpaceView: UIView = {
 
         let view = UIView()
         
         return view
     }()
     
-    private let header: UILabel = {
+    private lazy var header: UILabel = {
         let header = UILabel()
         header.text = "Категория"
         header.font = UIFont.systemFont(ofSize: 16, weight: .medium)
@@ -92,12 +92,9 @@ final class TrackerCreatorCategoryPickerController: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    deinit {
-        print("Picker was deleted!")
     }
     
     override func viewDidLoad() {
@@ -116,8 +113,8 @@ final class TrackerCreatorCategoryPickerController: UIViewController {
         
         tableViewHelper?.setMarkedElement(withName: pickedCategory)
         
-        trackerStorageObserver = NotificationCenter.default.addObserver(forName: TrackerStorage.didAddCategory, object: .none, queue: .main, using: { _ in
-
+        trackerStorageObserver = NotificationCenter.default.addObserver(forName: TrackerStorage.didAddCategory, object: .none, queue: .main, using: { [weak self] _ in
+            guard let self else { return }
             let categoriesArray = self.trackerStorage.categoriesArray.map({$0.category})
             categoriesArray.isEmpty ? self.showCategoriesAreEmpty() : self.showCategoryTableView()
             self.tableViewHelper?.updateTable(elements: categoriesArray)
@@ -214,11 +211,3 @@ extension TrackerCreatorCategoryPickerController: TrackerCreatorTableViewHelperD
         self.dismiss(animated: true)
     }
 }
-
-// MARK: Имеет ли смысл реализовывать добавление таким образом?
-//extension TrackerCreatorCategoryPickerController: TrackerCreatorCategoryCreatorDelegate {
-//    func receiveCategoryName(name: String) {
-//        trackerStorage.addCategory(category: name)
-//    }
-//}
-

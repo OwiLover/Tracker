@@ -29,12 +29,7 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
 
     weak var delegate: TrackerViewCollectionCustomCellDelegate?
     
-//    MARK: Если выставить всё в соответсвии с макетом, то получается две несостыковки:
-//    1) Смайлик при размере шрифта 16 становится слишком большим и едва помещается в view размером 24 на 24 пикселя (аналогичная ситуация, если закруглить frame текстового лейбла, хранящего смайлик
-//    2) Закругление View для смайлика слишком большое, было подставлено значение, подходящее визуально
-//    В связи с этим у меня вопрос, что следует сделать? Уменьшение шрифта для смайлика сделает его слишком маленьким, возможно стоит увеличить размер View?
-    
-    private let trackerCardView: UIView = {
+    private lazy var trackerCardView: UIView = {
         let view = UIView()
         
         view.layer.cornerRadius = 16
@@ -45,14 +40,14 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
         return view
     }()
     
-    private let emojiLabel: UILabel = {
+    private lazy var emojiLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         label.textAlignment = .center
         return label
     }()
     
-    private let emojiLabelView: UIView = {
+    private lazy var emojiLabelView: UIView = {
         let view = UIView()
         
         view.backgroundColor = .ypWhiteConstant.withAlphaComponent(0.3)
@@ -62,7 +57,7 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
         return view
     }()
     
-    private let trackerNameLabel: UILabel = {
+    private lazy var trackerNameLabel: UILabel = {
         let label = UILabel()
         
         let font = UIFont.systemFont(ofSize: 12, weight: .medium)
@@ -77,19 +72,19 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
         return label
     }()
     
-    private let trackerNameView: UIView = {
+    private lazy var trackerNameView: UIView = {
         let view = UIView()
         
         return view
     }()
     
-    private let streakView: UIView = {
+    private lazy var streakView: UIView = {
         let view = UIView()
 
         return view
     }()
     
-    private let streakLabel: UILabel = {
+    private lazy var streakLabel: UILabel = {
         let label = UILabel()
         let font = UIFont.systemFont(ofSize: 12, weight: .medium)
         
@@ -100,7 +95,7 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
         return label
     }()
     
-    private let streakButton: UIButton = {
+    private lazy var streakButton: UIButton = {
         let button = UIButton()
         let plusImage = UIImage(systemName: "plus")
         
@@ -132,6 +127,7 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
         streakCount = 0
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -258,7 +254,8 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
             streakCount -= 1
             streakLabel.text = "\(streakCount) \(getDayCountString(number: streakCount))"
             
-            UIView.animate(withDuration: 0.25) {
+            UIView.animate(withDuration: 0.25) { [weak self] in
+                guard let self else { return }
                 self.streakButton.backgroundColor = color.withAlphaComponent(1)
             }
         } else {
@@ -266,7 +263,8 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
             streakCount += 1
             streakLabel.text = "\(streakCount) \(getDayCountString(number: streakCount))"
             
-            UIView.animate(withDuration: 0.25) {
+            UIView.animate(withDuration: 0.25) { [weak self] in
+                guard let self else { return }
                 self.streakButton.backgroundColor = color.withAlphaComponent(0.3)
             }
         }

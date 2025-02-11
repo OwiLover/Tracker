@@ -13,14 +13,14 @@ final class TrackerCreatorCategoryCreatorController: UIViewController {
     
     private var trackerStorage: TrackerStorageProtocol? = TrackerStorage.shared
     
-    private let header: UILabel = {
+    private lazy var header: UILabel = {
         let header = UILabel()
         header.text = "Новая привычка"
         header.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         return header
     }()
     
-    private let categoryNameTextField: CustomTextField = {
+    private lazy var  categoryNameTextField: CustomTextField = {
         let textField = CustomTextField()
     
         textField.placeholder = "Введите название категории"
@@ -30,7 +30,7 @@ final class TrackerCreatorCategoryCreatorController: UIViewController {
         return textField
     }()
     
-    private let maxLengthWarningLabel: CustomWarningLabel = {
+    private lazy var  maxLengthWarningLabel: CustomWarningLabel = {
         let label = CustomWarningLabel()
         
         label.isHidden = true
@@ -40,7 +40,7 @@ final class TrackerCreatorCategoryCreatorController: UIViewController {
         return label
     }()
     
-    private let confirmButton: CustomButton = {
+    private lazy var  confirmButton: CustomButton = {
        let button = CustomButton()
         
         button.setTitle("Готово", for: .normal)
@@ -58,6 +58,7 @@ final class TrackerCreatorCategoryCreatorController: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

@@ -74,9 +74,7 @@ final class TrackerCreatorTableViewHelper: NSObject, UITableViewDelegate, UITabl
             cell.accessoryView = switcher
         
         case .checkmark:
-            print(checkMarkedElementName ?? "Nothing", elements[indexPath.row])
             if elements[indexPath.row] == checkMarkedElementName {
-                print("We have a match!")
                 markCell(cell: cell)
             } else {
                 cell.accessoryType = .none

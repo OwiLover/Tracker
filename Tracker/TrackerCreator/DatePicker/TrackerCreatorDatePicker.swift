@@ -11,47 +11,47 @@ import UIKit
 final class TrackerCreatorDatePicker: UIViewController {
     
     enum DayOfWeek: Int, CaseIterable {
-        case Monday = 1
-        case Tuesday = 2
-        case Wednesday = 3
-        case Thursday = 4
-        case Friday = 5
-        case Saturday = 6
-        case Sunday = 7
+        case monday = 1
+        case tuesday
+        case wednesday
+        case thursday
+        case friday
+        case saturday
+        case sunday
         
         var fullName: String {
             switch self {
-            case .Monday:
+            case .monday:
                 return "Понедельник"
-            case .Tuesday:
+            case .tuesday:
                 return "Вторник"
-            case .Wednesday:
+            case .wednesday:
                 return "Среда"
-            case .Thursday:
+            case .thursday:
                 return "Четверг"
-            case .Friday:
+            case .friday:
                 return "Пятница"
-            case .Saturday:
+            case .saturday:
                 return "Суббота"
-            case .Sunday:
+            case .sunday:
                 return "Воскресенье"
             }
         }
         var shortName: String {
             switch self {
-            case .Monday:
+            case .monday:
                 return "Пн"
-            case .Tuesday:
+            case .tuesday:
                 return "Вт"
-            case .Wednesday:
+            case .wednesday:
                 return "Ср"
-            case .Thursday:
+            case .thursday:
                 return "Чт"
-            case .Friday:
+            case .friday:
                 return "Пт"
-            case .Saturday:
+            case .saturday:
                 return "Сб"
-            case .Sunday:
+            case .sunday:
                 return "Вс"
             }
         }
@@ -102,6 +102,7 @@ final class TrackerCreatorDatePicker: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

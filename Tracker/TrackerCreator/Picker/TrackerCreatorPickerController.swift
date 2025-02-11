@@ -9,7 +9,7 @@ import UIKit
 
 final class TrackerCreatorPickerController: UIViewController {
     
-    private let header: UILabel = {
+    private lazy var header: UILabel = {
         let header = UILabel()
         
         header.text = "Создание трекера"

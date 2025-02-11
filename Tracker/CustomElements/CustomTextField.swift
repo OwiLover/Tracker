@@ -26,11 +26,10 @@ final class CustomTextField: UITextField {
         let font = UIFont.systemFont(ofSize: 17, weight: .regular)
         self.font = font
         
-//       К сожалению, в макете не совсем понятно, какой отступ справа, 41 или 62
-        
         self.textInsets = UIEdgeInsets(top: 6, left: 16, bottom: 6, right: 41)
     }
     
+    @available(*, unavailable)
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }

@@ -22,7 +22,16 @@ final class TrackerViewController: UIViewController {
     
     private var selectedDate: Date = Date()
     
-    private let trackerCollectionView: UICollectionView = {
+    private lazy var dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .none
+        formatter.dateFormat = "dd.MM.yyyy"
+        formatter.locale = Locale(identifier: "ru_RU")
+        return formatter
+    }()
+    
+    private lazy var trackerCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         
@@ -34,22 +43,13 @@ final class TrackerViewController: UIViewController {
         return collection
     }()
     
-    private lazy var dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        formatter.dateFormat = "dd.MM.yyyy"
-        formatter.locale = Locale(identifier: "ru_RU")
-        return formatter
-    }()
-    
-    private var emptyCategoriesImageView: UIImageView = {
+    private lazy var emptyCategoriesImageView: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "TrackerEmptyIcon"))
 
         return imageView
     }()
     
-    private var emptyCategoriesLabel: UILabel = {
+    private lazy var emptyCategoriesLabel: UILabel = {
         let label = UILabel()
         label.text = "Что будем отслеживать?"
         label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
@@ -57,7 +57,7 @@ final class TrackerViewController: UIViewController {
         return label
     }()
     
-    private var emptyCategoriesStackView: UIStackView = {
+    private lazy var emptyCategoriesStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.spacing = 8
         stackView.alignment = .center
@@ -78,7 +78,6 @@ final class TrackerViewController: UIViewController {
         setTrackerCollectionView()
         
         trackerStorageObserver = NotificationCenter.default.addObserver(forName: TrackerStorage.didAddTracker, object: nil, queue: .main, using: { [weak self] notification in
-            print(notification)
             guard let self else { return }
             self.reloadCollection(date: self.selectedDate)
         })
@@ -234,7 +233,7 @@ final class TrackerViewController: UIViewController {
                 element in
                 
                 let filter = element.schedule.contains(where: {day in
-                    day == dayOfWeek
+                    day == dayOfWeek 
                 })
                 
                 return isToday ? filter || element.schedule.isEmpty : filter

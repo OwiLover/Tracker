@@ -23,13 +23,15 @@ final class CustomButton: UIButton {
         self.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .medium)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
     override var isEnabled: Bool {
         didSet {
-            UIView.animate(withDuration: 0.25) {
+            UIView.animate(withDuration: 0.25) { [weak self] in
+                guard let self else { return }
                 self.backgroundColor = self.isEnabled ? .ypBlack : .ypGray
             }
         }

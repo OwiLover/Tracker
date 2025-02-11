@@ -34,13 +34,6 @@ final class TrackerCreatorCollectionHelper <T>: NSObject, UICollectionViewDelega
         collectionView.register(CustomCollectionHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: CustomCollectionHeader.identifier)
         
         collectionView.reloadData()
-        
-        print("Total Height: ",getTotalHeight())
-        print("CustomCollectionHelper was created!")
-    }
-    
-    deinit {
-        print("CustomCollectionHelper was deleted!")
     }
     
     func getTotalHeight() -> CGFloat {

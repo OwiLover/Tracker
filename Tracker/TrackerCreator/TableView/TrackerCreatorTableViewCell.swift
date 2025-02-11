@@ -33,6 +33,7 @@ final class TrackerCreatorTableViewCell: UITableViewCell {
         self.savedBackgroundColor = self.backgroundColor
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -84,7 +85,8 @@ final class TrackerCreatorTableViewCell: UITableViewCell {
     
     func changeBackgroundColor(color: UIColor?, animated: Bool) {
         if animated {
-            UIView.animate(withDuration: 0.1) {
+            UIView.animate(withDuration: 0.1) { [weak self] in
+                guard let self else { return }
                 self.backgroundColor = color
             }
         } else {

@@ -50,14 +50,14 @@ final class TrackerCreatorController: UIViewController {
     
     private var maxLengthWarningLabelConstraints: [NSLayoutConstraint] = []
     
-    private let header: UILabel = {
+    private lazy var header: UILabel = {
         let header = UILabel()
         header.text = "Новая привычка"
         header.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         return header
     }()
     
-    private let emojiCollectionView = {
+    private lazy var emojiCollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         let collection = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -66,7 +66,7 @@ final class TrackerCreatorController: UIViewController {
         return collection
     }()
     
-    private let colorCollectionView = {
+    private lazy var colorCollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         let collection = UICollectionView(frame: .zero, collectionViewLayout: layout)
@@ -75,7 +75,7 @@ final class TrackerCreatorController: UIViewController {
         return collection
     }()
     
-    private let trackerNameTextField: CustomTextField = {
+    private lazy var trackerNameTextField: CustomTextField = {
         let textField = CustomTextField()
     
         textField.placeholder = "Введите название трекера"
@@ -85,7 +85,7 @@ final class TrackerCreatorController: UIViewController {
         return textField
     }()
     
-    private let maxLengthWarningLabel: CustomWarningLabel = {
+    private lazy var maxLengthWarningLabel: CustomWarningLabel = {
         let label = CustomWarningLabel()
         
         label.isHidden = true
@@ -95,7 +95,7 @@ final class TrackerCreatorController: UIViewController {
         return label
     }()
     
-    private let tableView: UITableView = {
+    private lazy var tableView: UITableView = {
         let tableView = UITableView()
         tableView.backgroundColor = .none
         tableView.tintColor = .ypBlack
@@ -108,7 +108,7 @@ final class TrackerCreatorController: UIViewController {
         return tableView
     }()
     
-    private let cancelButton: UIButton = {
+    private lazy var cancelButton: UIButton = {
         let font = UIFont.systemFont(ofSize: 16, weight: .medium)
         
         let cancelButton = UIButton()
@@ -128,7 +128,7 @@ final class TrackerCreatorController: UIViewController {
         return cancelButton
     }()
     
-    private let createButton: CustomButton  = {
+    private lazy var createButton: CustomButton  = {
         
         let createButton = CustomButton()
         createButton.setTitle("Создать", for: .normal)
@@ -139,19 +139,19 @@ final class TrackerCreatorController: UIViewController {
         return createButton
     }()
     
-    private let trackerNameView: UIView = {
+    private lazy var trackerNameView: UIView = {
         let view = UIView()
         
         return view
     }()
     
-    private let buttonsView: UIView = {
+    private lazy var buttonsView: UIView = {
         let buttonsView = UIView()
 
         return buttonsView
     }()
     
-    private let scrollView: CustomScrollView = {
+    private lazy var scrollView: CustomScrollView = {
         let scrollView = CustomScrollView()
         
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -174,6 +174,7 @@ final class TrackerCreatorController: UIViewController {
         super.init(nibName: nil, bundle: nil)
     }
     
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -387,7 +388,8 @@ final class TrackerCreatorController: UIViewController {
                 
                 maxLengthWarningLabel.isHidden = true
                 
-                UIView.animate(withDuration: 0.25) {
+                UIView.animate(withDuration: 0.25) { [weak self] in
+                    guard let self else { return }
                     self.view.layoutIfNeeded()
                 }
             }
@@ -404,7 +406,8 @@ final class TrackerCreatorController: UIViewController {
                 
                 maxLengthWarningLabel.isHidden = false
                 
-                UIView.animate(withDuration: 0.25) {
+                UIView.animate(withDuration: 0.25) { [weak self] in
+                    guard let self else { return }
                     self.view.layoutIfNeeded()
                 }
             }
@@ -449,8 +452,6 @@ extension TrackerCreatorController: TrackerCreatorDatePickerDelegate {
                 return
             }
             daysString += "\(last.nameOfDay)"
-            
-            print("Days: "+daysString)
 
             cell.detailTextLabel?.text = daysString
         }

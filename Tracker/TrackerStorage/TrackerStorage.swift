@@ -15,15 +15,9 @@ final class TrackerStorage: TrackerStorageProtocol {
     static let didAddCategory = Notification.Name(rawValue: "TrackerStorageDidAddCategory")
     static let didAddTracker = Notification.Name(rawValue: "TrackerStorageDidAddTracker")
     
-    private init() {
-        print("Tracker Storage was created!")
-    }
-    
-    deinit {
-        print("Tracker Storage was deleted!")
-    }
-    
-    private(set) var categoriesArray: [TrackerCategory] = [TrackerCategory(category: "Random stuff", array: [Tracker(id: 0, name: "Wow", color: .colorSelection1, emoji: "❤️", schedule: [1,2,3]), Tracker(id: 1, name: "Look at the window", color: .colorSelection3, emoji: "😻", schedule: [1,2,3,4,5,6,7]), Tracker(id: 2, name: "Amazing Track", color: .colorSelection1, emoji: "🥶", schedule: [1,2,3]), Tracker(id: 3, name: "Get some food", color: .colorSelection3, emoji: "🥦", schedule: [2,3])]), TrackerCategory(category: "Another category", array: [Tracker(id: 4, name: "Give those plants some water!", color: .colorSelection2, emoji: "🌺", schedule: [2,3])])]
+    private init() {}
+
+    private(set) var categoriesArray: [TrackerCategory] = [TrackerCategory(category: "Random stuff", array: [Tracker(id: 0, name: "Wow", color: .colorSelection1, emoji: "❤️", schedule: [1,2,3]), Tracker(id: 1, name: "Look at the window", color: .colorSelection3, emoji: "😻", schedule: [1,2,3,4,5,6]), Tracker(id: 2, name: "Amazing Track", color: .colorSelection1, emoji: "🥶", schedule: [1,2,3]), Tracker(id: 3, name: "Get some food", color: .colorSelection3, emoji: "🥦", schedule: [2,3])]), TrackerCategory(category: "Another category", array: [Tracker(id: 4, name: "Give those plants some water!", color: .colorSelection2, emoji: "🌺", schedule: [2,3])])]
     
     
     private(set) var completedTrackers: [TrackerRecord] = {
@@ -46,8 +40,6 @@ final class TrackerStorage: TrackerStorageProtocol {
         }) {
             categoriesArray.append(newTrackerCategory)
         }
-        
-        print("Added new category!")
         
         NotificationCenter.default.post(name: TrackerStorage.didAddCategory, object: self, userInfo: ["Categories": self.categoriesArray])
     }
@@ -79,7 +71,7 @@ final class TrackerStorage: TrackerStorageProtocol {
             completedTrackerIds.insert(id)
             setTrackerRecord(id: id)
         }
-        print(completedTrackers, completedTrackerIds)
+//        print(completedTrackers, completedTrackerIds)
     }
     
     func unmarkTrackerAsCompleted(id: UInt32) {
@@ -87,7 +79,7 @@ final class TrackerStorage: TrackerStorageProtocol {
             completedTrackerIds.remove(id)
             removeTrackerRecord(id: id)
         }
-        print(completedTrackers, completedTrackerIds)
+//        print(completedTrackers, completedTrackerIds)
     }
     
     private func setTrackerRecord(id: UInt32) {
