@@ -8,10 +8,10 @@
 import Foundation
 
 protocol StoreProtocol {
-    associatedtype returnType
+    associatedtype ReturnType
     
-    var fetchedElements: [returnType] { get }
+    var fetchedElements: [ReturnType] { get }
     
-    func addNewElement(element: returnType) throws
-    func deleteElement(element: returnType) throws
+    func addNewElement(element: ReturnType) throws
+    func deleteElement(element: ReturnType) throws
 }

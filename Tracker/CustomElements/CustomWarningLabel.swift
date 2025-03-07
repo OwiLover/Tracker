@@ -21,7 +21,8 @@ final class CustomWarningLabel: UILabel {
     
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        assertionFailure("init(coder:) has not been implemented")
+        super.init(coder: coder)
     }
     
     override func addConstraints(_ constraints: [NSLayoutConstraint]) {

@@ -9,10 +9,12 @@ import UIKit
 
 final class CustomCollectionHeader: UICollectionReusableView {
     static let identifier = "CustomCollectionHeaderIdentifier"
-        
+    
+    static let fontSize: CGFloat = 19
+    
     private var header: UILabel = {
         let header = UILabel()
-        header.font = UIFont.systemFont(ofSize: 19, weight: .semibold)
+        header.font = UIFont.systemFont(ofSize: fontSize, weight: .semibold)
         return header
     }()
     
@@ -23,7 +25,8 @@ final class CustomCollectionHeader: UICollectionReusableView {
     
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        assertionFailure("init(coder:) has not been implemented")
+        super.init(coder: coder)
     }
     
     func setHeader(title: String) {

@@ -29,13 +29,11 @@ final class TrackerStorage: TrackerStorageProtocol {
 
     var categoriesArray: [TrackerCategory] {
         let array = trackerCategoryStore?.fetchedElements ?? []
-        print("Categories array: ", array)
         return array
     }
     
     var completedTrackers: [TrackerRecord] {
         let array = trackerRecordStore?.fetchedElements ?? []
-        print("Completed trackers: ", array)
         return array
     }
     
@@ -82,7 +80,6 @@ final class TrackerStorage: TrackerStorageProtocol {
             completedTrackerIds.insert(id)
             setTrackerRecord(id: id)
         }
-//        print(completedTrackers, completedTrackerIds)
     }
     
     func unmarkTrackerAsCompleted(id: UUID) {
@@ -90,7 +87,6 @@ final class TrackerStorage: TrackerStorageProtocol {
             completedTrackerIds.remove(id)
             removeTrackerRecord(id: id)
         }
-//        print(completedTrackers, completedTrackerIds)
     }
     
     private func setTrackerRecord(id: UUID) {
@@ -119,21 +115,16 @@ final class TrackerStorage: TrackerStorageProtocol {
     
     func getTrackerWithCategoryAndDay(category: String, day: Int) -> [Tracker] {
         guard let trackers = try? trackerStore?.getTrackersWithCategory(category: category) else { return [] }
-        return trackers.filter { tracker in
-            return tracker.schedule.contains { scheduleDay in
-                return scheduleDay == day
-            }
-        }
+        return trackers.filter { $0.schedule.contains(day) }
     }
 }
 
 extension TrackerStorage: StoreDelegate {
-//    MARK: Насколько такое решение уместно? В качестве альтернативы возникает пример в виде реализации делегата уже для классов, которые используют TrackerStorage
-//    Если данная реализация не выполняет требования для получения апдейтов NSFetchedResultsController, то подскажите, пожалуйста, что можно сделать
     func didUpdate(type: StoreType, changes: FetchedStorageChanges) {
         switch type {
         case .category:
             NotificationCenter.default.post(name: TrackerStorage.didAddCategory, object: self, userInfo: ["Categories": self.categoriesArray, "Changes": changes])
+            print("Notified Category!")
         case .record:
             print("Got some record changes!")
         case .tracker:

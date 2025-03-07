@@ -24,8 +24,6 @@ struct TrackerRecordDictionary {
             element in
             let elementCount = (dictionary[element.id]?.streakCount ?? 0) + 1
             
-//            MARK: По идее нет необходимости дополнительно проверять даты на порядок, поскольку последней всегда будет самая актуальная
-            
             let isChecked = calendar.isDate(element.date, equalTo: date, toGranularity: .day) ? true : false
             dictionary[element.id] = (elementCount, isChecked)
         })

@@ -9,7 +9,7 @@ import UIKit
 import CoreData
 
 @main
-class AppDelegate: UIResponder, UIApplicationDelegate {
+final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
@@ -20,17 +20,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window = UIWindow()
         window?.rootViewController = TabBarController()
         window?.makeKeyAndVisible()
-        
-//        guard let url = persistentContainer.persistentStoreDescriptions.first?.url else { return true }
-//        
-//        let persistentStoreCoordinator = persistentContainer.persistentStoreCoordinator
-//
-//         do {
-//             try persistentStoreCoordinator.destroyPersistentStore(at:url, ofType: NSSQLiteStoreType, options: nil)
-//             try persistentStoreCoordinator.addPersistentStore(ofType: NSSQLiteStoreType, configurationName: nil, at: url, options: nil)
-//         } catch {
-//             print("Attempted to clear persistent store: " + error.localizedDescription)
-//         }
         
         return true
     }
@@ -48,17 +37,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
-
-    lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "DataBase")
-        
-        
-        container.loadPersistentStores() { description, error in
-            if let error = error as NSError? {
-                fatalError("Something went wrong with Data Base: \(error)")
-            }
-        }
-        return container
-    }()
 }
 

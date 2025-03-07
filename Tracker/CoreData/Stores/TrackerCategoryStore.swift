@@ -9,24 +9,25 @@ import UIKit
 
 import CoreData
 
-class TrackerCategoryStore: NSObject {
-    
-//    static let shared = 
+final class TrackerCategoryStore: NSObject {
     
     var fetchedElements: [TrackerCategory] {
         guard let elements = fetchController?.fetchedObjects else { return [] }
         
-        return elements.map { element in
-            guard let category = element.category, let trackers = element.trackers else { fatalError("Can't convert something in TrackerCategory!") }
+        return elements.compactMap{ element in
+            guard let category = element.category, let trackers = element.trackers else { assertionFailure("Can't convert something in TrackerCategory!")
+                return nil
+            }
             
             let marshal = ColorMarshal()
             
             let trackerArrayCD = trackers.allObjects as? [TrackerCoreData] ?? []
             
-            let trackerArray = trackerArrayCD.map{ trackerCD in
+            let trackerArray = trackerArrayCD.compactMap { trackerCD in
                 guard let id = trackerCD.id, let name = trackerCD.name,
                       let color = trackerCD.color, let emoji = trackerCD.emoji,
-                      let schedule = trackerCD.schedule else { fatalError("Can't convert TrackerCD to normal data!") }
+                      let schedule = trackerCD.schedule else { fatalError("Can't convert TrackerCD to normal data!")
+                }
                 let tracker = Tracker(id: id, name: name, color: marshal.getUIColorFromHex(hex: color), emoji: emoji, schedule: schedule)
                 return tracker
             }
@@ -35,7 +36,7 @@ class TrackerCategoryStore: NSObject {
         }
     }
     
-    private (set) var context: NSManagedObjectContext?
+    private(set) var context: NSManagedObjectContext?
     private let fetchController: NSFetchedResultsController<TrackerCategoryCoreData>?
     
     private var insertSet: IndexSet?
@@ -44,12 +45,10 @@ class TrackerCategoryStore: NSObject {
     private weak var delegate: StoreDelegate?
     
     convenience init(delegate: StoreDelegate? = nil) {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
-            print("can't init AppDelegate!")
-            self.init(context: nil, delegate: nil)
-            return
-        }
-        let context = appDelegate.persistentContainer.viewContext
+        
+        let persistentContainer = PersistentContainerStorage.shared.persistentContainer
+        
+        let context = persistentContainer.viewContext
         
         self.init(context: context, delegate: delegate)
     }
@@ -65,6 +64,7 @@ class TrackerCategoryStore: NSObject {
         }
         
         self.context = context
+        self.delegate = delegate
         
         self.fetchController = {
             let request = TrackerCategoryCoreData.fetchRequest()
@@ -161,6 +161,8 @@ extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
         
         let fetchChanges = FetchedStorageChanges(insertIndexSet: insertSet, deleteIndexSet: deleteSet)
         
+        print("Changes were made!!!")
+        
         delegate?.didUpdate(type: .category, changes: fetchChanges)
         
         insertSet = nil
@@ -175,10 +177,14 @@ extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
     func controller(_ controller: NSFetchedResultsController<any NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         switch type {
         case .insert:
-            guard let indexPath = newIndexPath else { fatalError( "New index don't exist!") }
+            guard let indexPath = newIndexPath else { assertionFailure( "New index don't exist!")
+                return
+            }
             insertSet?.insert(indexPath.item)
         case .delete:
-            guard let indexPath = newIndexPath else { fatalError( "New index don't exist!") }
+            guard let indexPath = indexPath else { assertionFailure("This index don't exist!")
+                return
+            }
             deleteSet?.insert(indexPath.item)
         default:
             return

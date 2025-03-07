@@ -9,18 +9,20 @@ import UIKit
 
 import CoreData
 
-class TrackerRecordStore: NSObject {
+final class TrackerRecordStore: NSObject {
     
     var fetchedElements: [TrackerRecord] {
         guard let elements = fetchController?.fetchedObjects else { return [] }
         
-        return elements.map { element in
-            guard let id = element.id, let date = element.date else { fatalError("Can't convert something in TrackerRecords!")}
+        return elements.compactMap { element in
+            guard let id = element.id, let date = element.date else { assertionFailure("Can't convert something in TrackerRecords!")
+                return nil
+            }
             return TrackerRecord(id: id, date: date)
         }
     }
     
-    private (set) var context: NSManagedObjectContext?
+    private(set) var context: NSManagedObjectContext?
     private let fetchController: NSFetchedResultsController<TrackerRecordCoreData>?
     
     private var insertSet: IndexSet?
@@ -29,11 +31,8 @@ class TrackerRecordStore: NSObject {
     private weak var delegate: StoreDelegate?
     
     convenience init(delegate: StoreDelegate? = nil) {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
-            self.init(context: nil, delegate: nil)
-            return
-        }
-        let context = appDelegate.persistentContainer.viewContext
+        let persistentContainer = PersistentContainerStorage.shared.persistentContainer
+        let context = persistentContainer.viewContext
         
         self.init(context: context, delegate: delegate)
     }
@@ -48,6 +47,7 @@ class TrackerRecordStore: NSObject {
         }
         
         self.context = context
+        self.delegate = delegate
         
         self.fetchController = {
             let request = TrackerRecordCoreData.fetchRequest()
@@ -208,10 +208,14 @@ extension TrackerRecordStore: NSFetchedResultsControllerDelegate {
     func controller(_ controller: NSFetchedResultsController<any NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         switch type {
         case .insert:
-            guard let indexPath = newIndexPath else { fatalError( "New index don't exist!") }
+            guard let indexPath = newIndexPath else { assertionFailure( "New index don't exist!")
+                return
+            }
             insertSet?.insert(indexPath.item)
         case .delete:
-            guard let indexPath = indexPath else { fatalError( "New index don't exist!") }
+            guard let indexPath = indexPath else { assertionFailure("This index don't exist!")
+                return
+            }
             deleteSet?.insert(indexPath.item)
         default:
             return

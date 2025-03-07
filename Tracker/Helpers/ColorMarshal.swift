@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ColorMarshal {
+final class ColorMarshal {
     func getHexFromUIColor(color: UIColor) -> String {
         let components = color.cgColor.components
         let r: CGFloat = components?[0] ?? 0.0

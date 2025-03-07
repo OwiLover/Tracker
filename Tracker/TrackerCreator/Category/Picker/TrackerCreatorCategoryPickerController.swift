@@ -15,8 +15,6 @@ final class TrackerCreatorCategoryPickerController: UIViewController {
     
     private var trackerStorageObserver: NSObjectProtocol?
     
-//    MARK: Возможно стоит хранить название выбранной ячейки в контроллере, а не в хелпере?
-    
     private weak var delegate: TrackerCreatorCategoryPickerDelegate?
     
     private var tableViewHelper: TrackerCreatorTableViewHelper? = nil

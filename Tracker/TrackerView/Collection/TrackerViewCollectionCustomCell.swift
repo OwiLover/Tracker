@@ -129,7 +129,8 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
     
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        assertionFailure("init(coder:) has not been implemented")
+        super.init(coder: coder)
     }
     
     func setupCell(id: UUID, emoji: String, name: String, backgroundColor: UIColor, streakCount: UInt16 = 0, delegate: TrackerViewCollectionCustomCellDelegate? = nil, isEnabled: Bool, isSelected: Bool = false) {

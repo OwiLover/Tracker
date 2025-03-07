@@ -9,20 +9,22 @@ import UIKit
 
 import CoreData
 
-class TrackerStore: NSObject {
+final class TrackerStore: NSObject {
     
     var fetchedElements: [Tracker] {
         guard let elements = fetchController?.fetchedObjects else { return [] }
         
         let marshal = ColorMarshal()
-        return elements.map { element in
-            guard let id = element.id, let name = element.name, let color = element.color, let emoji = element.emoji, let schedule = element.schedule else { fatalError("Can't convert something in Trackers!")}
+        return elements.compactMap { element in
+            guard let id = element.id, let name = element.name, let color = element.color, let emoji = element.emoji, let schedule = element.schedule else { assertionFailure("Can't convert something in Trackers!")
+                return nil
+            }
             
             return Tracker(id: id, name: name, color: marshal.getUIColorFromHex(hex: color), emoji: emoji, schedule: schedule)
         }
     }
     
-    private (set) var context: NSManagedObjectContext?
+    private(set) var context: NSManagedObjectContext?
     private let fetchController: NSFetchedResultsController<TrackerCoreData>?
     
     private var insertSet: IndexSet?
@@ -31,11 +33,10 @@ class TrackerStore: NSObject {
     private weak var delegate: StoreDelegate?
     
     convenience init(delegate: StoreDelegate? = nil) {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
-            self.init(context: nil, delegate: nil)
-            return
-        }
-        let context = appDelegate.persistentContainer.viewContext
+        
+        let persistentContainer = PersistentContainerStorage.shared.persistentContainer
+        
+        let context = persistentContainer.viewContext
         
         self.init(context: context, delegate: delegate)
     }
@@ -50,6 +51,7 @@ class TrackerStore: NSObject {
         }
         
         self.context = context
+        self.delegate = delegate
         
         self.fetchController = {
             let request = TrackerCoreData.fetchRequest()
@@ -99,11 +101,7 @@ class TrackerStore: NSObject {
             return
         }
         let fetchRequest = TrackerCoreData.fetchRequest()
-        
-        ///пытался побороть проблему, однако #keyPath(TrackerCoreData.id) выдаёт ошибку "Ambiguous reference to member 'id'"
-        ///вероятнее всего это связано с тем, что id в CoreData уже зарезервировано и при перезаписи на свой элемент происходит несостыковка
-        ///что в таком случае лучше делать?
-        ///Возможно, стоит не создавать id вообще в CoreData вручную и переписать логику для работы с ObjectIdentifier?
+
         fetchRequest.predicate = NSPredicate(format: "%K == %@", keyPath, element.id as NSUUID)
         
         if let result = try? context.fetch(fetchRequest) {
@@ -133,35 +131,14 @@ class TrackerStore: NSObject {
         
         let marshal = ColorMarshal()
         
-        return trackers.map { element in
-            guard let id = element.id, let name = element.name, let color = element.color, let emoji = element.emoji, let schedule = element.schedule else { fatalError("Can't convert something in Trackers!")}
+        return trackers.compactMap { element in
+            guard let id = element.id, let name = element.name, let color = element.color, let emoji = element.emoji, let schedule = element.schedule else { assertionFailure("Can't convert something in Trackers!")
+                return nil
+            }
             
             return Tracker(id: id, name: name, color: marshal.getUIColorFromHex(hex: color), emoji: emoji, schedule: schedule)
         }
     }
-    
-//   MARK: К сожалению, данная функция не сработает, расписание, хранящееся в виде Transformable [Int] вызывает ошибку при данном запросе
-//    func getTrackerWithCategoryAndDay(category: String, day: Int) throws -> [Tracker] {
-//        guard let context, let categoryKeyPath = (\TrackerCoreData.category?.category)._kvcKeyPathString,
-//              let scheduleKeyPath = (\TrackerCoreData.schedule)._kvcKeyPathString else {
-//            print("no context or wrong keyPath!")
-//            return []
-//        }
-//        let fetchRequest = TrackerCoreData.fetchRequest()
-//
-//        fetchRequest.predicate = NSPredicate(format: "%K == %@ AND %K CONTAINS %ld", categoryKeyPath, category, scheduleKeyPath, day)
-//
-//        
-//        let trackers = try context.fetch(fetchRequest)
-//        
-//        let marshal = ColorMarshal()
-//        
-//        return trackers.map { element in
-//            guard let id = element.id, let name = element.name, let color = element.color, let emoji = element.emoji, let schedule = element.schedule else { fatalError("Can't convert something in Trackers!")}
-//            
-//            return Tracker(id: id, name: name, color: marshal.getUIColorFromHex(hex: color), emoji: emoji, schedule: schedule)
-//        }
-//    }
 }
 
 extension TrackerStore: NSFetchedResultsControllerDelegate {
@@ -183,10 +160,14 @@ extension TrackerStore: NSFetchedResultsControllerDelegate {
     func controller(_ controller: NSFetchedResultsController<any NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
         switch type {
         case .insert:
-            guard let indexPath = newIndexPath else { fatalError( "New index don't exist!") }
+            guard let indexPath = newIndexPath else { assertionFailure( "New index don't exist!")
+                return
+            }
             insertSet?.insert(indexPath.item)
         case .delete:
-            guard let indexPath = newIndexPath else { fatalError( "New index don't exist!") }
+            guard let indexPath = indexPath else { assertionFailure("This index don't exist!")
+                return
+            }
             deleteSet?.insert(indexPath.item)
         default:
             return
