@@ -25,7 +25,7 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
     
     private var streakCount: UInt16 = 0
     
-    private var id: UInt32?
+    private var id: UUID?
 
     weak var delegate: TrackerViewCollectionCustomCellDelegate?
     
@@ -132,7 +132,7 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setupCell(id: UInt32, emoji: String, name: String, backgroundColor: UIColor, streakCount: UInt16 = 0, delegate: TrackerViewCollectionCustomCellDelegate? = nil, isEnabled: Bool, isSelected: Bool = false) {
+    func setupCell(id: UUID, emoji: String, name: String, backgroundColor: UIColor, streakCount: UInt16 = 0, delegate: TrackerViewCollectionCustomCellDelegate? = nil, isEnabled: Bool, isSelected: Bool = false) {
         self.id = id
         emojiLabel.text = emoji
         trackerNameLabel.text = name

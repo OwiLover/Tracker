@@ -8,10 +8,10 @@
 import Foundation
 
 struct TrackerRecordDictionary {
-    let dictionary: [UInt32: (streakCount: UInt16, isChecked: Bool)]
+    let dictionary: [UUID: (streakCount: UInt16, isChecked: Bool)]
     
     init(trackerRecords: [TrackerRecord]? = nil) {
-        var dictionary = Dictionary<UInt32, (streakCount: UInt16, isChecked: Bool)>()
+        var dictionary = Dictionary<UUID, (streakCount: UInt16, isChecked: Bool)>()
         guard let trackerRecords else {
             self.dictionary = dictionary
             return

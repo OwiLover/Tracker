@@ -267,7 +267,7 @@ final class TrackerViewController: UIViewController {
 }
 
 extension TrackerViewController: TrackerViewCollectionHelperDelegate {
-    func updateStreak(shouldIncrease: Bool, trackerId: UInt32) {
+    func updateStreak(shouldIncrease: Bool, trackerId: UUID) {
         guard let trackerStorage else { return }
         shouldIncrease ? trackerStorage.markTrackerAsCompleted(id: trackerId) : trackerStorage.unmarkTrackerAsCompleted(id: trackerId)
         

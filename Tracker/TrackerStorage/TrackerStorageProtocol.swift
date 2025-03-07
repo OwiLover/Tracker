@@ -14,6 +14,6 @@ protocol TrackerStorageProtocol {
     func addCategory(category: String)
     func addTrackerToCategory(name: String, color: UIColor, emoji: String, schedule: [Int], category: String)
     
-    func markTrackerAsCompleted(id: UInt32)
-    func unmarkTrackerAsCompleted(id: UInt32)
+    func markTrackerAsCompleted(id: UUID)
+    func unmarkTrackerAsCompleted(id: UUID)
 }

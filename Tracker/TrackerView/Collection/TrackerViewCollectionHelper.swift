@@ -121,7 +121,7 @@ extension TrackerViewCollectionHelper: UICollectionViewDelegateFlowLayout {
 }
 
 extension TrackerViewCollectionHelper: TrackerViewCollectionCustomCellDelegate {
-    func streakButtonWasPressed(buttonState: Bool, trackerId: UInt32) {
+    func streakButtonWasPressed(buttonState: Bool, trackerId: UUID) {
         delegate?.updateStreak(shouldIncrease: buttonState, trackerId: trackerId)
     }
 }

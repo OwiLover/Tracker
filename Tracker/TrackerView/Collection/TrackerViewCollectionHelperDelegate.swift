@@ -8,5 +8,5 @@
 import Foundation
 
 protocol TrackerViewCollectionHelperDelegate: AnyObject {
-    func updateStreak(shouldIncrease: Bool, trackerId: UInt32)
+    func updateStreak(shouldIncrease: Bool, trackerId: UUID)
 }
