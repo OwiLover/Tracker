@@ -131,6 +131,7 @@ final class TrackerStorage: TrackerStorageProtocol {
 
 extension TrackerStorage: StoreDelegate {
 //    MARK: Насколько такое решение уместно? В качестве альтернативы возникает пример в виде реализации делегата уже для классов, которые используют TrackerStorage
+//    Если данная реализация не выполняет требования для получения апдейтов NSFetchedResultsController, то подскажите, пожалуйста, что можно сделать
     func didUpdate(type: StoreType, changes: FetchedStorageChanges) {
         switch type {
         case .category:
