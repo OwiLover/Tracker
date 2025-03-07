@@ -82,7 +82,7 @@ final class TrackerCreatorTableViewHelper: NSObject, UITableViewDelegate, UITabl
         }
         
         if indexPath.row + 1 == elements.count {
-//          Не совсем понятно, как решить проблему последнего элемента более элегантно (один из вариантов решения на просторах интернета является добавлением UIView, который будет перекрывать всю линию, что также кажется не совсем идеальным решением
+
             cell.setInsets(top: 0, left: 0, bottom: 0, right: tableView.bounds.width)
             
             elements.count == 1 ? cell.setAsTheOnlyCell() : cell.setAsLastCell()

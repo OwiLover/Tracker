@@ -140,7 +140,7 @@ class TrackerStore: NSObject {
         }
     }
     
-    
+//   MARK: К сожалению, данная функция не сработает, расписание, хранящееся в виде Transformable [Int] вызывает ошибку при данном запросе
 //    func getTrackerWithCategoryAndDay(category: String, day: Int) throws -> [Tracker] {
 //        guard let context, let categoryKeyPath = (\TrackerCoreData.category?.category)._kvcKeyPathString,
 //              let scheduleKeyPath = (\TrackerCoreData.schedule)._kvcKeyPathString else {
@@ -150,8 +150,7 @@ class TrackerStore: NSObject {
 //        let fetchRequest = TrackerCoreData.fetchRequest()
 //
 //        fetchRequest.predicate = NSPredicate(format: "%K == %@ AND %K CONTAINS %ld", categoryKeyPath, category, scheduleKeyPath, day)
-//        
-//        //   К сожалению, данная функция не сработает, расписание, хранящееся в виде Transformable [Int] вызывает ошибку при данном запросе
+//
 //        
 //        let trackers = try context.fetch(fetchRequest)
 //        

@@ -7,8 +7,6 @@
 
 import UIKit
 
-// MARK: Данный класс является временным решением для проверки работы создания трекеров
-
 final class TrackerStorage: TrackerStorageProtocol {
 
     static let shared = TrackerStorage()
