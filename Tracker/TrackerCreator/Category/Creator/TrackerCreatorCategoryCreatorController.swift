@@ -15,7 +15,7 @@ final class TrackerCreatorCategoryCreatorController: UIViewController {
     
     private lazy var header: UILabel = {
         let header = UILabel()
-        header.text = "Новая привычка"
+        header.text = "Новая категория"
         header.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         return header
     }()

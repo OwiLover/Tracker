@@ -169,11 +169,6 @@ final class TrackerViewController: UIViewController {
         present(navigationBar, animated: true)
     }
     
-    /*
-     Изначально была идея создать кнопку с датой, однако во время беседы с наставником выяснилось, что с таким подходом реализовать функционал всплывающего календаря крайне сложно и следует использовать DatePicker в стиле .compact, хоть он и не совсем соответствует макету
-     Однако мне всё ещё интересно, как можно было реализовать появление календаря через обычный UIButton?
-     */
-    
     private func setNavigationBarDatePicker() {
         let datePickerButton = UIDatePicker()
         
@@ -267,7 +262,7 @@ final class TrackerViewController: UIViewController {
 }
 
 extension TrackerViewController: TrackerViewCollectionHelperDelegate {
-    func updateStreak(shouldIncrease: Bool, trackerId: UInt32) {
+    func updateStreak(shouldIncrease: Bool, trackerId: UUID) {
         guard let trackerStorage else { return }
         shouldIncrease ? trackerStorage.markTrackerAsCompleted(id: trackerId) : trackerStorage.unmarkTrackerAsCompleted(id: trackerId)
         

@@ -25,7 +25,8 @@ final class CustomButton: UIButton {
     
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        assertionFailure("init(coder:) has not been implemented")
+        super.init(coder: coder)
     }
     
     override var isEnabled: Bool {

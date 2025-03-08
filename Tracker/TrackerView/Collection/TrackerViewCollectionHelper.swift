@@ -110,18 +110,12 @@ extension TrackerViewCollectionHelper: UICollectionViewDelegateFlowLayout {
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        let indexPath = IndexPath(row: 0, section: section)
-        let headerView = self.collectionView(collectionView, viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader, at: indexPath)
-
-        return headerView.systemLayoutSizeFitting(CGSize(width: collectionView.bounds.width,
-                                                         height: UIView.layoutFittingExpandedSize.height),
-                                                         withHorizontalFittingPriority: .required,
-                                                         verticalFittingPriority: .fittingSizeLevel)
+        return CGSize(width: collectionView.bounds.width, height: CustomCollectionHeader.getRequiredHeight)
     }
 }
 
 extension TrackerViewCollectionHelper: TrackerViewCollectionCustomCellDelegate {
-    func streakButtonWasPressed(buttonState: Bool, trackerId: UInt32) {
+    func streakButtonWasPressed(buttonState: Bool, trackerId: UUID) {
         delegate?.updateStreak(shouldIncrease: buttonState, trackerId: trackerId)
     }
 }

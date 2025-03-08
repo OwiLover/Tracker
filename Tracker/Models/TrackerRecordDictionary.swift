@@ -8,10 +8,10 @@
 import Foundation
 
 struct TrackerRecordDictionary {
-    let dictionary: [UInt32: (streakCount: UInt16, isChecked: Bool)]
+    let dictionary: [UUID: (streakCount: UInt16, isChecked: Bool)]
     
     init(trackerRecords: [TrackerRecord]? = nil) {
-        var dictionary = Dictionary<UInt32, (streakCount: UInt16, isChecked: Bool)>()
+        var dictionary = Dictionary<UUID, (streakCount: UInt16, isChecked: Bool)>()
         guard let trackerRecords else {
             self.dictionary = dictionary
             return
@@ -23,8 +23,6 @@ struct TrackerRecordDictionary {
         trackerRecords.forEach({
             element in
             let elementCount = (dictionary[element.id]?.streakCount ?? 0) + 1
-            
-//            MARK: По идее нет необходимости дополнительно проверять даты на порядок, поскольку последней всегда будет самая актуальная
             
             let isChecked = calendar.isDate(element.date, equalTo: date, toGranularity: .day) ? true : false
             dictionary[element.id] = (elementCount, isChecked)

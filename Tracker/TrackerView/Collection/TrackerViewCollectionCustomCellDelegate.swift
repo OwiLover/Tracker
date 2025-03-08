@@ -8,5 +8,5 @@
 import Foundation
 
 protocol TrackerViewCollectionCustomCellDelegate: AnyObject {
-    func streakButtonWasPressed(buttonState: Bool, trackerId: UInt32)
+    func streakButtonWasPressed(buttonState: Bool, trackerId: UUID)
 }

@@ -7,8 +7,6 @@
 
 import UIKit
 
-// MARK: Посчитал, что стоило создать относительно универсальный хелпер для tableView'ов в отделе TrackerCreator, чтобы не копировать много кода для каждого случая. Является ли такой подход помощника уместным? Или стоит для каждого уникального варианта создавать свой класс со своими настройками, даже если они расходятся лишь немного?
-
 final class TrackerCreatorTableViewHelper: NSObject, UITableViewDelegate, UITableViewDataSource {
     
     enum AccessoryType {
@@ -82,7 +80,7 @@ final class TrackerCreatorTableViewHelper: NSObject, UITableViewDelegate, UITabl
         }
         
         if indexPath.row + 1 == elements.count {
-//          Не совсем понятно, как решить проблему последнего элемента более элегантно (один из вариантов решения на просторах интернета является добавлением UIView, который будет перекрывать всю линию, что также кажется не совсем идеальным решением
+
             cell.setInsets(top: 0, left: 0, bottom: 0, right: tableView.bounds.width)
             
             elements.count == 1 ? cell.setAsTheOnlyCell() : cell.setAsLastCell()
@@ -134,9 +132,10 @@ final class TrackerCreatorTableViewHelper: NSObject, UITableViewDelegate, UITabl
                     return IndexPath(row: index, section: 0)
                 }
                 self.tableView.insertRows(at: indexPathArray, with: .automatic)
-            }
-            self.tableView.reloadData()
+                }
         })
+        self.tableView.reloadData()
+        print("Updated!")
     }
     
     func setSelectedSwitchers(turnedOnArray: [Int]) {

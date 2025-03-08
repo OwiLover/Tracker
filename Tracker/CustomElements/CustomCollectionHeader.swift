@@ -9,10 +9,19 @@ import UIKit
 
 final class CustomCollectionHeader: UICollectionReusableView {
     static let identifier = "CustomCollectionHeaderIdentifier"
-        
+    
+    static let fontSize: CGFloat = 19
+    
+    static let getRequiredHeight: CGFloat = {
+        let font = UIFont.systemFont(ofSize: fontSize, weight: .semibold)
+        return font.lineHeight
+    }()
+    
     private var header: UILabel = {
         let header = UILabel()
-        header.font = UIFont.systemFont(ofSize: 19, weight: .semibold)
+        header.font = UIFont.systemFont(ofSize: fontSize, weight: .semibold)
+        header.adjustsFontSizeToFitWidth = true
+        header.minimumScaleFactor = 0.7
         return header
     }()
     
@@ -23,7 +32,8 @@ final class CustomCollectionHeader: UICollectionReusableView {
     
     @available(*, unavailable)
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        assertionFailure("init(coder:) has not been implemented")
+        super.init(coder: coder)
     }
     
     func setHeader(title: String) {
@@ -36,6 +46,7 @@ final class CustomCollectionHeader: UICollectionReusableView {
         
         NSLayoutConstraint.activate([
             header.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 28),
+            header.trailingAnchor.constraint(equalTo: trailingAnchor),
             header.topAnchor.constraint(equalTo: topAnchor),
             header.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])

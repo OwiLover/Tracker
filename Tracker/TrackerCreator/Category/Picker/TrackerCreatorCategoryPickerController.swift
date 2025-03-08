@@ -15,8 +15,6 @@ final class TrackerCreatorCategoryPickerController: UIViewController {
     
     private var trackerStorageObserver: NSObjectProtocol?
     
-//    MARK: Возможно стоит хранить название выбранной ячейки в контроллере, а не в хелпере?
-    
     private weak var delegate: TrackerCreatorCategoryPickerDelegate?
     
     private var tableViewHelper: TrackerCreatorTableViewHelper? = nil
@@ -113,9 +111,11 @@ final class TrackerCreatorCategoryPickerController: UIViewController {
         
         tableViewHelper?.setMarkedElement(withName: pickedCategory)
         
-        trackerStorageObserver = NotificationCenter.default.addObserver(forName: TrackerStorage.didAddCategory, object: .none, queue: .main, using: { [weak self] _ in
+        trackerStorageObserver = NotificationCenter.default.addObserver(forName: TrackerStorage.didAddCategory, object: .none, queue: .main, using: { [weak self] changesDictionary in
             guard let self else { return }
-            let categoriesArray = self.trackerStorage.categoriesArray.map({$0.category})
+//          Несмотря на присутствие changeDictionary, решил его не использовать
+            print("CHANGES: ", changesDictionary)
+            let categoriesArray = self.trackerStorage.categoriesArray.map({ $0.category })
             categoriesArray.isEmpty ? self.showCategoriesAreEmpty() : self.showCategoryTableView()
             self.tableViewHelper?.updateTable(elements: categoriesArray)
         })

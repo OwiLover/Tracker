@@ -45,8 +45,6 @@ final class TrackerCreatorTableViewCell: UITableViewCell {
 
     }
     
-//  В связи с тем, что при выборе ячейки выделение не совпадало с формой ячейки, пришлось самостоятельно реализовать setHighlighted и setSelected
-    
     override func setHighlighted(_ highlighted: Bool, animated: Bool) {
         if highlighted == true {
             savedBackgroundColor = self.backgroundColor
