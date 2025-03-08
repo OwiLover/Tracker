@@ -5,8 +5,6 @@
 //  Created by Owi Lover on 2/22/25.
 //
 
-import UIKit
-
 import CoreData
 
 final class TrackerRecordStore: NSObject {

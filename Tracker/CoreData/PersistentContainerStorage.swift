@@ -7,7 +7,7 @@
 
 import CoreData
 
-class PersistentContainerStorage {
+final class PersistentContainerStorage {
     static let shared = PersistentContainerStorage()
     
     private init() {}
