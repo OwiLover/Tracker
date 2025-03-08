@@ -110,7 +110,7 @@ extension TrackerViewCollectionHelper: UICollectionViewDelegateFlowLayout {
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        return CGSize(width: collectionView.bounds.width, height: CustomCollectionHeader.getRequiredSize)
+        return CGSize(width: collectionView.bounds.width, height: CustomCollectionHeader.getRequiredHeight)
     }
 }
 

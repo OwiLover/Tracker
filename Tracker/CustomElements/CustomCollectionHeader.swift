@@ -12,7 +12,7 @@ final class CustomCollectionHeader: UICollectionReusableView {
     
     static let fontSize: CGFloat = 19
     
-    static let getRequiredSize: CGFloat = {
+    static let getRequiredHeight: CGFloat = {
         let font = UIFont.systemFont(ofSize: fontSize, weight: .semibold)
         return font.lineHeight
     }()
@@ -20,6 +20,8 @@ final class CustomCollectionHeader: UICollectionReusableView {
     private var header: UILabel = {
         let header = UILabel()
         header.font = UIFont.systemFont(ofSize: fontSize, weight: .semibold)
+        header.adjustsFontSizeToFitWidth = true
+        header.minimumScaleFactor = 0.7
         return header
     }()
     
@@ -44,6 +46,7 @@ final class CustomCollectionHeader: UICollectionReusableView {
         
         NSLayoutConstraint.activate([
             header.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 28),
+            header.trailingAnchor.constraint(equalTo: trailingAnchor),
             header.topAnchor.constraint(equalTo: topAnchor),
             header.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
