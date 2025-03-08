@@ -12,6 +12,11 @@ final class CustomCollectionHeader: UICollectionReusableView {
     
     static let fontSize: CGFloat = 19
     
+    static let getRequiredSize: CGFloat = {
+        let font = UIFont.systemFont(ofSize: fontSize, weight: .semibold)
+        return font.lineHeight
+    }()
+    
     private var header: UILabel = {
         let header = UILabel()
         header.font = UIFont.systemFont(ofSize: fontSize, weight: .semibold)
