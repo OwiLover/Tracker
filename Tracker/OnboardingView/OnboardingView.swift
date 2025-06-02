@@ -7,7 +7,7 @@
 
 import UIKit
 
-class OnboardingView: UIPageViewController {
+final class OnboardingView: UIPageViewController {
     
     private enum BackgroundImages: String {
         case first = "OnboardingBackground1"

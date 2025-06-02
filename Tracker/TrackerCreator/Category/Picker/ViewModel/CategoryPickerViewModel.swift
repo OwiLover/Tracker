@@ -7,7 +7,7 @@
 
 import Foundation
 
-class CategoryPickerViewModel {
+final class CategoryPickerViewModel {
 
     private let model: TrackerCategoryStoreProtocol
     

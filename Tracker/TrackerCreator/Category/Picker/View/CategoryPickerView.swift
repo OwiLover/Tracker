@@ -7,7 +7,9 @@
 
 import UIKit
 
-class CategoryPickerViewController: UIViewController {
+// MARK: Решил уменьшить название класса по сравнению с оригинальным контроллером, поскольку TrackerCreatorCategoryPickerViewController выглядит крайне громоздко
+
+final class CategoryPickerViewController: UIViewController {
     
     private let viewModel = CategoryPickerViewModel()
     

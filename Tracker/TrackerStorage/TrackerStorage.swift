@@ -135,6 +135,7 @@ extension TrackerStorage: GlobalStoreDelegate {
 
 extension TrackerStorage: CategoryStoreDelegate {
     func didUpdate(changes: FetchedStorageChanges) {
+//      MARK: Данное решение создано, чтобы поддерживать работу главного экрана с трекерами, поскольку он не переписан под MVVM
         NotificationCenter.default.post(name: TrackerStorage.didAddCategory, object: self, userInfo: ["Categories": self.categoriesArray, "Changes": changes])
     }
 }

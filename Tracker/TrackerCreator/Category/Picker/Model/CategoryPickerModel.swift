@@ -7,7 +7,9 @@
 
 import Foundation
 
-class CategoryPickerModel {
+// MARK: изначально была идея создать модель-прослойку между ViewModel и Storage, специально заточенной под CategoryPicker, однако посчитал её лишней и использовал в качестве модели TrackerCategoryStore
+
+final class CategoryPickerModel {
     
     let storage: TrackerStorageProtocol
     
