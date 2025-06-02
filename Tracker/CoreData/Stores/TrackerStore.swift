@@ -28,9 +28,9 @@ final class TrackerStore: NSObject {
     private var insertSet: IndexSet?
     private var deleteSet: IndexSet?
     
-    private weak var delegate: StoreDelegate?
+    private weak var delegate: GlobalStoreDelegate?
     
-    convenience init(delegate: StoreDelegate? = nil) {
+    convenience init(delegate: GlobalStoreDelegate? = nil) {
         
         let persistentContainer = PersistentContainerStorage.shared.persistentContainer
         
@@ -39,7 +39,7 @@ final class TrackerStore: NSObject {
         self.init(context: context, delegate: delegate)
     }
     
-    init(context: NSManagedObjectContext?, delegate: StoreDelegate?) {
+    init(context: NSManagedObjectContext?, delegate: GlobalStoreDelegate?) {
         
         guard let context else {
             self.context = nil

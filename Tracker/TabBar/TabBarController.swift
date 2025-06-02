@@ -34,6 +34,19 @@ final class TabBarController: UITabBarController {
         nav.setupNavigationAppearance()
         
         self.viewControllers = [nav, statsViewController]
+        
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        let storage = DefaultsStorage.shared
+        
+        if !storage.checkedOnboardView() {
+            let onboardingView = OnboardingView(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
+            onboardingView.modalPresentationStyle = .fullScreen
+            present(onboardingView, animated: true)
+        }
     }
     
     private func tabBarAppearanceSetup() {

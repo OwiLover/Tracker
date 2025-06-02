@@ -13,6 +13,10 @@ enum StoreType {
     case record
 }
 
-protocol StoreDelegate: AnyObject {
+protocol GlobalStoreDelegate: AnyObject {
     func didUpdate(type: StoreType, changes: FetchedStorageChanges)
+}
+
+protocol CategoryStoreDelegate: AnyObject {
+    func didUpdate(changes: FetchedStorageChanges)
 }

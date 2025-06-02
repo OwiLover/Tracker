@@ -482,7 +482,7 @@ extension TrackerCreatorController: TrackerCreatorTableViewHelperDelegate {
         
         switch header {
         case .tableViewCategoryCell:
-            let viewController = TrackerCreatorCategoryPickerController(delegate: self)
+            let viewController = CategoryPickerViewController(delegate: self)
             viewController.setPickedCategory(withName: categoryPicked)
             viewController.modalPresentationStyle = .popover
         

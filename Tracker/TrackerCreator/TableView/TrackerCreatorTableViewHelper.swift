@@ -138,6 +138,30 @@ final class TrackerCreatorTableViewHelper: NSObject, UITableViewDelegate, UITabl
         print("Updated!")
     }
     
+    func makeChangesInTable(added: IndexSet?, deleted: IndexSet?, newArray: [String]) {
+        let added = added ?? IndexSet()
+        let deleted = deleted ?? IndexSet()
+        guard !added.isEmpty || !deleted.isEmpty else { return }
+        self.tableView.performBatchUpdates({ [weak self] in
+            guard let self else { return }
+            self.elements = newArray
+            if !added.isEmpty {
+                let indexPathArray = added.map {
+                    index in
+                    return IndexPath(row: index, section: 0)
+                }
+                self.tableView.insertRows(at: indexPathArray, with: .automatic)
+            }
+            if !deleted.isEmpty {
+                let indexPathArray = deleted.map {
+                    index in
+                    return IndexPath(row: index, section: 0)
+                }
+                self.tableView.deleteRows(at: indexPathArray, with: .fade)
+            }
+        })
+    }
+    
     func setSelectedSwitchers(turnedOnArray: [Int]) {
         guard !turnedOnArray.isEmpty else { return }
         switch accessoryType {

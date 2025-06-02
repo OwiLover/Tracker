@@ -1,21 +1,15 @@
 //
-//  TrackerCreatorCategoryPicker.swift
+//  CategoryPickerView.swift
 //  Tracker
 //
-//  Created by Owi Lover on 11/27/24.
+//  Created by Owi Lover on 5/7/25.
 //
 
 import UIKit
 
-final class TrackerCreatorCategoryPickerController: UIViewController {
+class CategoryPickerViewController: UIViewController {
     
-//    private let viewModel = CategoryPickerViewModel()
-    
-    private(set) var pickedCategory: String? = nil
-    
-    private var trackerStorage: TrackerStorageProtocol
-    
-    private var trackerStorageObserver: NSObjectProtocol?
+    private let viewModel = CategoryPickerViewModel()
     
     private weak var delegate: TrackerCreatorCategoryPickerDelegate?
     
@@ -86,8 +80,7 @@ final class TrackerCreatorCategoryPickerController: UIViewController {
         return header
     }()
     
-    init(trackerStorage: TrackerStorageProtocol = TrackerStorage.shared, delegate: TrackerCreatorCategoryPickerDelegate? = nil) {
-        self.trackerStorage = trackerStorage
+    init(delegate: TrackerCreatorCategoryPickerDelegate? = nil) {
         self.delegate = delegate
         super.init(nibName: nil, bundle: nil)
     }
@@ -105,26 +98,38 @@ final class TrackerCreatorCategoryPickerController: UIViewController {
         setEmptyIconImageView()
         setCategoryTableView()
         
-        trackerStorage.categoriesArray.isEmpty ? showCategoriesAreEmpty() : showCategoryTableView()
+        setViewModelBinding()
         
-        let categories = trackerStorage.categoriesArray.map { $0.category }
+        tableViewHelper = TrackerCreatorTableViewHelper(tableView: categoryTableView, elements: viewModel.categoriesArray, delegate: self, accessoryType: .checkmark)
         
-        tableViewHelper = TrackerCreatorTableViewHelper(tableView: categoryTableView, elements: categories, delegate: self, accessoryType: .checkmark)
-        
-        tableViewHelper?.setMarkedElement(withName: pickedCategory)
-        
-        trackerStorageObserver = NotificationCenter.default.addObserver(forName: TrackerStorage.didAddCategory, object: .none, queue: .main, using: { [weak self] changesDictionary in
+        tableViewHelper?.setMarkedElement(withName: viewModel.pickedCategory)
+    }
+    
+    func setViewModelBinding() {
+        viewModel.onUpdateCategoriesArray = { [weak self] array in
             guard let self else { return }
-            
-            print("CHANGES: ", changesDictionary)
-            let categoriesArray = self.trackerStorage.categoriesArray.map({ $0.category })
-            categoriesArray.isEmpty ? self.showCategoriesAreEmpty() : self.showCategoryTableView()
-            self.tableViewHelper?.updateTable(elements: categoriesArray)
-        })
+            self.tableViewHelper?.updateTable(elements: array)
+        }
+        
+        viewModel.onUpdateShowCategories = { [weak self] state in
+            guard let self else { return }
+            print(state)
+            state ? self.showCategoryTableView() : self.showCategoriesAreEmpty()
+        }
+        
+        viewModel.onCategorySelected = { [weak self] category in
+            guard let self else { return }
+            self.tableViewHelper?.setMarkedElement(withName: category)
+        }
+        
+        viewModel.onUpdateCategories = { [weak self] changes in
+            guard let self else { return }
+            self.tableViewHelper?.makeChangesInTable(added: changes.insertIndexSet, deleted: changes.deleteIndexSet, newArray: self.viewModel.categoriesArray)
+        }
     }
     
     func setPickedCategory(withName name: String?) {
-        pickedCategory = name
+        viewModel.pickedCategory = name
     }
     
     private func showCategoriesAreEmpty() {
@@ -207,7 +212,7 @@ final class TrackerCreatorCategoryPickerController: UIViewController {
     }
 }
 
-extension TrackerCreatorCategoryPickerController: TrackerCreatorTableViewHelperDelegate {
+extension CategoryPickerViewController: TrackerCreatorTableViewHelperDelegate {
     func cellWasPressed(withHeader header: String) {
         delegate?.receiveCategoryName(name: header)
         self.dismiss(animated: true)
