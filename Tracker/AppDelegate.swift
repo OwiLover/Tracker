@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import CoreData
 
 @main
 final class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -18,8 +17,12 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to select a configuration to create the new scene with.
         
         window = UIWindow()
-        window?.rootViewController = TabBarController()
-        window?.makeKeyAndVisible()
+        
+//        if DefaultsStorage.shared.checkedOnboardView() {
+//            window?.rootViewController = TabBarController()
+//        } else {
+//            window?.rootViewController = OnboardingView()
+//        }
         
         return true
     }

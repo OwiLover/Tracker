@@ -7,7 +7,17 @@
 
 import CoreData
 
-final class TrackerCategoryStore: NSObject {
+// специально для categoryPicker хранилище категорий было модифицировано, однако, поскольку ранее все хранилища шли в общий класс-контроллер и работали через observer, чтобы не сломать всё, кроме categoryPicker, было принято решение оставить старый функционал, поскольку на переработку всего остального не хватает времени
+protocol TrackerCategoryStoreProtocol {
+    func setDelegate(_ : CategoryStoreDelegate?)
+    var fetchedElements: [TrackerCategory] { get }
+    func getCategoriesNames() -> [String]
+    func addNewCategory(category: TrackerCategory) throws
+    func addNewTracker(for: String, tracker: Tracker) throws
+    func deleteCategory(category: TrackerCategory) throws
+}
+
+final class TrackerCategoryStore: NSObject, TrackerCategoryStoreProtocol {
     
     var fetchedElements: [TrackerCategory] {
         guard let elements = fetchController?.fetchedObjects else { return [] }
@@ -40,9 +50,9 @@ final class TrackerCategoryStore: NSObject {
     private var insertSet: IndexSet?
     private var deleteSet: IndexSet?
     
-    private weak var delegate: StoreDelegate?
+    private weak var delegate: CategoryStoreDelegate?
     
-    convenience init(delegate: StoreDelegate? = nil) {
+    convenience init(delegate: CategoryStoreDelegate? = nil) {
         
         let persistentContainer = PersistentContainerStorage.shared.persistentContainer
         
@@ -51,7 +61,7 @@ final class TrackerCategoryStore: NSObject {
         self.init(context: context, delegate: delegate)
     }
     
-    init(context: NSManagedObjectContext?, delegate: StoreDelegate?) {
+    init(context: NSManagedObjectContext?, delegate: CategoryStoreDelegate?) {
         
         guard let context, let idKeyPath = (\TrackerCategoryCoreData.category)._kvcKeyPathString else {
             print("can't init context or keyPath!")
@@ -78,6 +88,14 @@ final class TrackerCategoryStore: NSObject {
         super.init()
         
         self.fetchController?.delegate = self
+    }
+    
+    func setDelegate(_ delegate: CategoryStoreDelegate?) {
+        self.delegate = delegate
+    }
+    
+    func getCategoriesNames() -> [String] {
+        fetchedElements.map { $0.category }
     }
     
     func addNewCategory(category: TrackerCategory) throws {
@@ -131,7 +149,7 @@ final class TrackerCategoryStore: NSObject {
         }
     }
     
-    func deleteElement(element: TrackerCategory) throws {
+    func deleteCategory(category element: TrackerCategory) throws {
         guard let context, let keyPath = (\TrackerCategoryCoreData.category)._kvcKeyPathString else {
             print("no context or wrong keyPath!")
             return
@@ -161,7 +179,7 @@ extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
         
         print("Changes were made!!!")
         
-        delegate?.didUpdate(type: .category, changes: fetchChanges)
+        delegate?.didUpdate(changes: fetchChanges)
         
         insertSet = nil
         deleteSet = nil

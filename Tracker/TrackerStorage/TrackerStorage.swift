@@ -119,7 +119,7 @@ final class TrackerStorage: TrackerStorageProtocol {
     }
 }
 
-extension TrackerStorage: StoreDelegate {
+extension TrackerStorage: GlobalStoreDelegate {
     func didUpdate(type: StoreType, changes: FetchedStorageChanges) {
         switch type {
         case .category:
@@ -130,5 +130,12 @@ extension TrackerStorage: StoreDelegate {
         case .tracker:
             NotificationCenter.default.post(name: TrackerStorage.didAddTracker, object: self, userInfo: ["Changes": changes])
         }
+    }
+}
+
+extension TrackerStorage: CategoryStoreDelegate {
+    func didUpdate(changes: FetchedStorageChanges) {
+//      MARK: Данное решение создано, чтобы поддерживать работу главного экрана с трекерами, поскольку он не переписан под MVVM
+        NotificationCenter.default.post(name: TrackerStorage.didAddCategory, object: self, userInfo: ["Categories": self.categoriesArray, "Changes": changes])
     }
 }

@@ -73,6 +73,10 @@ final class TrackerCreatorTableViewCell: UITableViewCell {
         self.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
     }
     
+    func setAsDefaultCell() {
+        self.layer.maskedCorners = []
+    }
+    
     func setAsFirstCell() {
         self.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
     }

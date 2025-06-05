@@ -34,6 +34,11 @@ final class TabBarController: UITabBarController {
         nav.setupNavigationAppearance()
         
         self.viewControllers = [nav, statsViewController]
+        
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
     }
     
     private func tabBarAppearanceSetup() {
