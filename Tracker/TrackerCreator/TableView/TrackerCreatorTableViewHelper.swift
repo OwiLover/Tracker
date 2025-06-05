@@ -80,9 +80,7 @@ final class TrackerCreatorTableViewHelper: NSObject, UITableViewDelegate, UITabl
         }
         
         if indexPath.row + 1 == elements.count {
-
             cell.setInsets(top: 0, left: 0, bottom: 0, right: tableView.bounds.width)
-            
             elements.count == 1 ? cell.setAsTheOnlyCell() : cell.setAsLastCell()
 
         } else {
@@ -132,7 +130,7 @@ final class TrackerCreatorTableViewHelper: NSObject, UITableViewDelegate, UITabl
                     return IndexPath(row: index, section: 0)
                 }
                 self.tableView.insertRows(at: indexPathArray, with: .automatic)
-                }
+            }
         })
         self.tableView.reloadData()
         print("Updated!")
@@ -144,11 +142,24 @@ final class TrackerCreatorTableViewHelper: NSObject, UITableViewDelegate, UITabl
         guard !added.isEmpty || !deleted.isEmpty else { return }
         self.tableView.performBatchUpdates({ [weak self] in
             guard let self else { return }
+            let oldCount = self.elements.count
             self.elements = newArray
             if !added.isEmpty {
                 let indexPathArray = added.map {
                     index in
                     return IndexPath(row: index, section: 0)
+                }
+                if !elements.isEmpty {
+                    if let first = indexPathArray.first(where: { $0.row == 0 }) {
+                        let cell = self.tableView.cellForRow(at: first) as? TrackerCreatorTableViewCell
+                        oldCount == 1 ? cell?.setAsLastCell() : cell?.setAsDefaultCell()
+                    }
+                    if var last = indexPathArray.first(where: { $0.row == self.elements.count - 1 }) {
+                        last.row -= 1
+                        let cell = self.tableView.cellForRow(at: last) as? TrackerCreatorTableViewCell
+                        cell?.setInsets(top: 0, left: spacing.leftInset, bottom: 0, right: spacing.rightInset)
+                        oldCount == 1 ? cell?.setAsFirstCell() : cell?.setAsDefaultCell()
+                    }
                 }
                 self.tableView.insertRows(at: indexPathArray, with: .automatic)
             }

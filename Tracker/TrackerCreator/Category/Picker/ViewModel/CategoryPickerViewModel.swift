@@ -7,7 +7,20 @@
 
 import Foundation
 
-final class CategoryPickerViewModel {
+protocol CategoryPickerViewModelProtocol {
+    typealias Binding<T> = (T) -> Void
+    
+    var pickedCategory: String? { get set }
+    var categoriesArray: [String] { get }
+    func didPickCategory(name: String)
+    
+    var onCategorySelected: Binding<String?>? { get set }
+    var onUpdateShowCategories: Binding<Bool>? { get set }
+    var onUpdateCategoriesArray: Binding<[String]>? { get set }
+    var onUpdateCategories: Binding<FetchedStorageChanges>? { get set }
+}
+
+final class CategoryPickerViewModel: CategoryPickerViewModelProtocol {
 
     private let model: TrackerCategoryStoreProtocol
     
@@ -23,7 +36,6 @@ final class CategoryPickerViewModel {
         }
         set(value){
             didUpdateCategories(categoriesArray: value)
-            print(value)
         }
     }
     
@@ -45,7 +57,8 @@ final class CategoryPickerViewModel {
     }
     
     private func didUpdateCategories(categoriesArray: [String]) {
-        onUpdateShowCategories?(categoriesArray.isEmpty)
+        print("Updated! Array: \(categoriesArray)")
+        onUpdateShowCategories?(!categoriesArray.isEmpty)
         onUpdateCategoriesArray?(categoriesArray)
     }
 }

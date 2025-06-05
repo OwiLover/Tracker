@@ -34,8 +34,5 @@ final class CategoryPickerModel {
     }
     
     func didPickCategory(name category: String) {
-//        pickedCategory = category
     }
-    
-//    var pickedCategory: String? = nil
 }

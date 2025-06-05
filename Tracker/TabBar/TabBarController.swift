@@ -39,15 +39,6 @@ final class TabBarController: UITabBarController {
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-//       MARK: Хотелось придумать что-то с переключение rootview контроллера в AppDelegate, но не разобрался, как сделать это правильно, насколько не оптимизировано данное решение?
-        let storage = DefaultsStorage.shared
-        
-        if !storage.checkedOnboardView() {
-            let onboardingView = OnboardingView(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
-            onboardingView.modalPresentationStyle = .fullScreen
-            present(onboardingView, animated: true)
-        }
     }
     
     private func tabBarAppearanceSetup() {

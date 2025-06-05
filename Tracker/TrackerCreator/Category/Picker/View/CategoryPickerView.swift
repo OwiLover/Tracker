@@ -11,11 +11,11 @@ import UIKit
 
 final class CategoryPickerViewController: UIViewController {
     
-    private let viewModel = CategoryPickerViewModel()
+    private let viewModel: CategoryPickerViewModelProtocol?
     
     private weak var delegate: TrackerCreatorCategoryPickerDelegate?
     
-    private var tableViewHelper: TrackerCreatorTableViewHelper? = nil
+    private var tableViewHelper: TrackerCreatorTableViewHelper?
     
     private lazy var categoryTableView: UITableView = {
         let tableView = UITableView()
@@ -82,8 +82,9 @@ final class CategoryPickerViewController: UIViewController {
         return header
     }()
     
-    init(delegate: TrackerCreatorCategoryPickerDelegate? = nil) {
+    init(viewModel: CategoryPickerViewModelProtocol? = CategoryPickerViewModel(), delegate: TrackerCreatorCategoryPickerDelegate? = nil) {
         self.delegate = delegate
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -99,15 +100,23 @@ final class CategoryPickerViewController: UIViewController {
         setIconAndLabelStackView()
         setEmptyIconImageView()
         setCategoryTableView()
-        
         setViewModelBinding()
+
+        guard let viewModel else {
+            showCategoriesAreEmpty()
+            return
+        }
         
-        tableViewHelper = TrackerCreatorTableViewHelper(tableView: categoryTableView, elements: viewModel.categoriesArray, delegate: self, accessoryType: .checkmark)
+        let array = viewModel.categoriesArray
+        !array.isEmpty ? showCategoryTableView() : showCategoriesAreEmpty()
         
+        tableViewHelper = TrackerCreatorTableViewHelper(tableView: categoryTableView, elements: array, delegate: self, accessoryType: .checkmark)
         tableViewHelper?.setMarkedElement(withName: viewModel.pickedCategory)
     }
     
     func setViewModelBinding() {
+        guard var viewModel else { return }
+        
         viewModel.onUpdateCategoriesArray = { [weak self] array in
             guard let self else { return }
             self.tableViewHelper?.updateTable(elements: array)
@@ -125,12 +134,13 @@ final class CategoryPickerViewController: UIViewController {
         }
         
         viewModel.onUpdateCategories = { [weak self] changes in
-            guard let self else { return }
-            self.tableViewHelper?.makeChangesInTable(added: changes.insertIndexSet, deleted: changes.deleteIndexSet, newArray: self.viewModel.categoriesArray)
+            guard let self, let array = self.viewModel?.categoriesArray else { return }
+            self.tableViewHelper?.makeChangesInTable(added: changes.insertIndexSet, deleted: changes.deleteIndexSet, newArray: array)
         }
     }
     
     func setPickedCategory(withName name: String?) {
+        guard var viewModel else { return }
         viewModel.pickedCategory = name
     }
     

@@ -10,7 +10,7 @@ import Foundation
 final class DefaultsStorage {
     
     enum Keys: String {
-        case checkedOnboardView = "checkedOnboardView"
+        case checkedOnboardView
     }
     
     static let shared = DefaultsStorage()

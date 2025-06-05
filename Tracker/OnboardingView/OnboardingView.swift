@@ -84,8 +84,8 @@ final class OnboardingView: UIPageViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.dataSource = self
-        self.delegate = self
+        dataSource = self
+        delegate = self
         
         setUI()
         
@@ -145,6 +145,16 @@ final class OnboardingView: UIPageViewController {
     private func didTapConfirmButton() {
         let storage = DefaultsStorage.shared
         storage.setCheckedOnboardView(true)
+        
+        let tabBarController = TabBarController()
+        
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first else { return }
+        
+        UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: { [weak self] in
+            guard self != nil else { return }
+            window.rootViewController = tabBarController
+        }, completion: nil)
         self.presentingViewController?.dismiss(animated: true)
     }
 }
