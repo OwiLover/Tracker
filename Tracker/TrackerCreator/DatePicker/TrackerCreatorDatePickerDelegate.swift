@@ -8,5 +8,5 @@
 import Foundation
 
 protocol TrackerCreatorDatePickerDelegate: AnyObject {
-    func receivePickedDays(days: [(dayOfWeekNum: Int, nameOfDay: String)])
+    func receivePickedDays(days: [Int])
 }

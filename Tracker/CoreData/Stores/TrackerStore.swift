@@ -18,7 +18,7 @@ final class TrackerStore: NSObject {
                 return nil
             }
             
-            return Tracker(id: id, name: name, color: marshal.getUIColorFromHex(hex: color), emoji: emoji, schedule: schedule)
+            return Tracker(id: id, name: name, color: marshal.getUIColorFromHex(hex: color), emoji: emoji, schedule: schedule, isPinned: element.isPinned)
         }
     }
     
@@ -93,14 +93,45 @@ final class TrackerStore: NSObject {
         }
     }
     
-    func deleteTracker(element: Tracker) throws {
+    func updateExistingTracker(tracker: Tracker) throws {
+        guard let context, let keyPath = (\TrackerCoreData.id)._kvcKeyPathString else {
+            print("No context!")
+            return
+        }
+        
+        let fetchRequest = TrackerCoreData.fetchRequest()
+        
+        fetchRequest.predicate = NSPredicate(format: "%K == %@", keyPath, tracker.id as NSUUID)
+        fetchRequest.fetchLimit = 1
+        
+        if let result = try? context.fetch(fetchRequest) {
+            guard let originalTracker = result.first else { return }
+            
+            let marshal = ColorMarshal()
+            let color = marshal.getHexFromUIColor(color: tracker.color)
+            
+            originalTracker.name = tracker.name
+            originalTracker.color = color
+            originalTracker.emoji = tracker.emoji
+            originalTracker.schedule = tracker.schedule
+        }
+        
+        do {
+            try context.save()
+        } catch {
+            print("Can't update tracker from TrackerCoreData! Error: \(error)")
+            context.rollback()
+        }
+    }
+    
+    func deleteTracker(withId id: UUID) throws {
         guard let context, let keyPath = (\TrackerCoreData.id)._kvcKeyPathString else {
             print("no context or wrong keyPath!")
             return
         }
         let fetchRequest = TrackerCoreData.fetchRequest()
 
-        fetchRequest.predicate = NSPredicate(format: "%K == %@", keyPath, element.id as NSUUID)
+        fetchRequest.predicate = NSPredicate(format: "%K == %@", keyPath, id as NSUUID)
         
         if let result = try? context.fetch(fetchRequest) {
             for element in result {
@@ -111,8 +142,37 @@ final class TrackerStore: NSObject {
         do {
             try context.save()
         } catch {
-            print("Can't delete element from TrackerCoreData!")
+            print("Can't delete element from TrackerCoreData! Error: \(error)")
             context.rollback()
+        }
+    }
+    
+    func getTracker(withId id: UUID) throws -> (tracker: Tracker, category: String?)? {
+        guard let context, let keyPath = (\TrackerCoreData.id)._kvcKeyPathString else {
+            print("no context or wrong keyPath!")
+            return nil
+        }
+        let fetchRequest = TrackerCoreData.fetchRequest()
+        
+        fetchRequest.predicate = NSPredicate(format: "%K == %@", keyPath, id as NSUUID)
+        
+        if let result = try? context.fetch(fetchRequest), let trackerCD = result.first {
+            guard let id = trackerCD.id, let name = trackerCD.name, let colorHex = trackerCD.color, let emoji = trackerCD.emoji, let schedule = trackerCD.schedule else {
+                return nil
+            }
+            
+            let category = trackerCD.category?.category
+            
+            let marshal = ColorMarshal()
+            
+            let color = marshal.getUIColorFromHex(hex: colorHex)
+            
+            let tracker = Tracker(id: id, name: name, color: color, emoji: emoji, schedule: schedule)
+            
+            return (tracker, category)
+            
+        } else {
+            return nil
         }
     }
     
@@ -135,6 +195,54 @@ final class TrackerStore: NSObject {
             }
             
             return Tracker(id: id, name: name, color: marshal.getUIColorFromHex(hex: color), emoji: emoji, schedule: schedule)
+        }
+    }
+    
+    func pinTracker(withId id: UUID) {
+        guard let context, let keyPath = (\TrackerCoreData.id)._kvcKeyPathString else {
+            print("No context!")
+            return
+        }
+        
+        let fetchRequest = TrackerCoreData.fetchRequest()
+        
+        fetchRequest.predicate = NSPredicate(format: "%K == %@", keyPath, id as NSUUID)
+        fetchRequest.fetchLimit = 1
+        
+        if let result = try? context.fetch(fetchRequest) {
+            guard let originalTracker = result.first else { return }
+            
+            originalTracker.isPinned = true
+        }
+        do {
+            try context.save()
+        } catch {
+            print("Can't pin tracker from TrackerCoreData! Error: \(error)")
+            context.rollback()
+        }
+    }
+    
+    func unpinTracker(withId id: UUID) {
+        guard let context, let keyPath = (\TrackerCoreData.id)._kvcKeyPathString else {
+            print("No context!")
+            return
+        }
+        
+        let fetchRequest = TrackerCoreData.fetchRequest()
+        
+        fetchRequest.predicate = NSPredicate(format: "%K == %@", keyPath, id as NSUUID)
+        fetchRequest.fetchLimit = 1
+        
+        if let result = try? context.fetch(fetchRequest) {
+            guard let originalTracker = result.first else { return }
+            
+            originalTracker.isPinned = false
+        }
+        do {
+            try context.save()
+        } catch {
+            print("Can't unpin tracker from TrackerCoreData! Error: \(error)")
+            context.rollback()
         }
     }
 }

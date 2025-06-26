@@ -7,55 +7,55 @@
 
 import UIKit
 
-
-final class TrackerCreatorDatePicker: UIViewController {
+enum DayOfWeek: Int, CaseIterable {
+    case monday = 1
+    case tuesday
+    case wednesday
+    case thursday
+    case friday
+    case saturday
+    case sunday
     
-    enum DayOfWeek: Int, CaseIterable {
-        case monday = 1
-        case tuesday
-        case wednesday
-        case thursday
-        case friday
-        case saturday
-        case sunday
-        
-        var fullName: String {
-            switch self {
-            case .monday:
-                return "Понедельник"
-            case .tuesday:
-                return "Вторник"
-            case .wednesday:
-                return "Среда"
-            case .thursday:
-                return "Четверг"
-            case .friday:
-                return "Пятница"
-            case .saturday:
-                return "Суббота"
-            case .sunday:
-                return "Воскресенье"
-            }
-        }
-        var shortName: String {
-            switch self {
-            case .monday:
-                return "Пн"
-            case .tuesday:
-                return "Вт"
-            case .wednesday:
-                return "Ср"
-            case .thursday:
-                return "Чт"
-            case .friday:
-                return "Пт"
-            case .saturday:
-                return "Сб"
-            case .sunday:
-                return "Вс"
-            }
+    var fullName: String {
+        switch self {
+        case .monday:
+            return "Понедельник"
+        case .tuesday:
+            return "Вторник"
+        case .wednesday:
+            return "Среда"
+        case .thursday:
+            return "Четверг"
+        case .friday:
+            return "Пятница"
+        case .saturday:
+            return "Суббота"
+        case .sunday:
+            return "Воскресенье"
         }
     }
+    var shortName: String {
+        switch self {
+        case .monday:
+            return "Пн"
+        case .tuesday:
+            return "Вт"
+        case .wednesday:
+            return "Ср"
+        case .thursday:
+            return "Чт"
+        case .friday:
+            return "Пт"
+        case .saturday:
+            return "Сб"
+        case .sunday:
+            return "Вс"
+        }
+    }
+}
+
+
+final class TrackerCreatorDatePicker: UIViewController {
     
     weak var delegate: TrackerCreatorDatePickerDelegate?
     
@@ -92,7 +92,7 @@ final class TrackerCreatorDatePicker: UIViewController {
         return button
     }()
     
-    private var dateTableViewHelper: TrackerCreatorTableViewHelper?
+    private var dateTableViewHelper: CustomTableViewHelper?
     
     private let elementSpacing = CustomSpacing(leftInset: 16, rightInset: 16, topInset: 16, elementHeight: 75)
     
@@ -113,7 +113,7 @@ final class TrackerCreatorDatePicker: UIViewController {
         
         setNavBar()
         
-        dateTableViewHelper = TrackerCreatorTableViewHelper(tableView: dateTableView, elements: elements, spacing: elementSpacing, accessoryType: .switcher)
+        dateTableViewHelper = CustomTableViewHelper(tableView: dateTableView, elements: elements, spacing: elementSpacing, accessoryType: .switcher)
         
         dateTableViewHelper?.setSelectedSwitchers(turnedOnArray: activeSwitchers)
         
@@ -161,10 +161,10 @@ final class TrackerCreatorDatePicker: UIViewController {
     private func confirmButtonDidPress() {
         guard let selectedElements = dateTableViewHelper?.selectedElements else { return }
         let sortedElements = selectedElements.sorted()
-        var days: [(Int, String)] = []
+        var days: [Int] = []
         for element in sortedElements {
             guard let day = DayOfWeek(rawValue: element) else { continue }
-            days.append((day.rawValue, day.shortName))
+            days.append(day.rawValue)
         }
         delegate?.receivePickedDays(days: days)
         self.dismiss(animated: true)

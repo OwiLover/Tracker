@@ -7,8 +7,8 @@
 
 import UIKit
 
-final class TrackerCreatorTableViewCell: UITableViewCell {
-    static let identifier = "TrackerCreatorTableViewCell"
+final class CustomTableViewCell: UITableViewCell {
+    static let identifier = "CustomTableViewCell"
     
     private var savedBackgroundColor: UIColor? = nil
     
@@ -42,7 +42,6 @@ final class TrackerCreatorTableViewCell: UITableViewCell {
         super.prepareForReuse()
 
         self.layer.maskedCorners = []
-
     }
     
     override func setHighlighted(_ highlighted: Bool, animated: Bool) {

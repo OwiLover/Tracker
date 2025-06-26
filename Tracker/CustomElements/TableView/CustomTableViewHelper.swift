@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class TrackerCreatorTableViewHelper: NSObject, UITableViewDelegate, UITableViewDataSource {
+final class CustomTableViewHelper: NSObject, UITableViewDelegate, UITableViewDataSource {
     
     enum AccessoryType {
         case disclosure
@@ -15,15 +15,17 @@ final class TrackerCreatorTableViewHelper: NSObject, UITableViewDelegate, UITabl
         case checkmark
     }
     
-    weak var delegate: TrackerCreatorTableViewHelperDelegate?
+    weak var delegate: CustomTableViewHelperDelegate?
     
     private(set) var selectedElements: Set<Int> = Set<Int>()
     
-    private(set) var checkMarkedElement: TrackerCreatorTableViewCell? = nil
+    private(set) var checkMarkedElement: CustomTableViewCell? = nil
     
     private(set) var checkMarkedElementName: String? = nil
     
     private var elements: [String]
+    
+    private var underElements: [String]?
     
     private var tableView: UITableView
     
@@ -31,16 +33,17 @@ final class TrackerCreatorTableViewHelper: NSObject, UITableViewDelegate, UITabl
     
     private let accessoryType: AccessoryType
     
-    init(tableView: UITableView, elements: [String], spacing: CustomSpacing = CustomSpacing(leftInset: 16, rightInset: 16, topInset: 0, elementHeight: 75), delegate: TrackerCreatorTableViewHelperDelegate? = nil, accessoryType: AccessoryType) {
+    init(tableView: UITableView, elements: [String], underElements: [String]? = nil, spacing: CustomSpacing = CustomSpacing(leftInset: 16, rightInset: 16, topInset: 0, elementHeight: 75), delegate: CustomTableViewHelperDelegate? = nil, accessoryType: AccessoryType) {
                 
         self.elements = elements
         self.tableView = tableView
         self.spacing = spacing
         self.delegate = delegate
         self.accessoryType = accessoryType
+        self.underElements = underElements
         super.init()
         
-        tableView.register(TrackerCreatorTableViewCell.self, forCellReuseIdentifier: TrackerCreatorTableViewCell.identifier)
+        tableView.register(CustomTableViewCell.self, forCellReuseIdentifier: CustomTableViewCell.identifier)
         
         tableView.dataSource = self
         tableView.delegate = self
@@ -51,10 +54,14 @@ final class TrackerCreatorTableViewHelper: NSObject, UITableViewDelegate, UITabl
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: TrackerCreatorTableViewCell.identifier, for: indexPath) as? TrackerCreatorTableViewCell else { return UITableViewCell() }
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: CustomTableViewCell.identifier, for: indexPath) as? CustomTableViewCell else { return UITableViewCell() }
         cell.prepareForReuse()
         
         cell.textLabel?.text = elements[indexPath.row]
+        
+        if let count = underElements?.count, count > indexPath.row {
+            cell.detailTextLabel?.text = underElements?[indexPath.row]
+        }
 
         switch accessoryType {
         case .disclosure:
@@ -90,7 +97,6 @@ final class TrackerCreatorTableViewHelper: NSObject, UITableViewDelegate, UITabl
             }
         }
 
-        
         return cell
     }
     
@@ -99,7 +105,7 @@ final class TrackerCreatorTableViewHelper: NSObject, UITableViewDelegate, UITabl
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let cell = tableView.cellForRow(at: indexPath) as? TrackerCreatorTableViewCell, let header = cell.textLabel?.text else { return }
+        guard let cell = tableView.cellForRow(at: indexPath) as? CustomTableViewCell, let header = cell.textLabel?.text else { return }
         switch self .accessoryType {
         case .disclosure:
             self.delegate?.cellWasPressed(withHeader: header)
@@ -151,12 +157,12 @@ final class TrackerCreatorTableViewHelper: NSObject, UITableViewDelegate, UITabl
                 }
                 if !elements.isEmpty {
                     if let first = indexPathArray.first(where: { $0.row == 0 }) {
-                        let cell = self.tableView.cellForRow(at: first) as? TrackerCreatorTableViewCell
+                        let cell = self.tableView.cellForRow(at: first) as? CustomTableViewCell
                         oldCount == 1 ? cell?.setAsLastCell() : cell?.setAsDefaultCell()
                     }
                     if var last = indexPathArray.first(where: { $0.row == self.elements.count - 1 }) {
                         last.row -= 1
-                        let cell = self.tableView.cellForRow(at: last) as? TrackerCreatorTableViewCell
+                        let cell = self.tableView.cellForRow(at: last) as? CustomTableViewCell
                         cell?.setInsets(top: 0, left: spacing.leftInset, bottom: 0, right: spacing.rightInset)
                         oldCount == 1 ? cell?.setAsFirstCell() : cell?.setAsDefaultCell()
                     }
@@ -187,7 +193,7 @@ final class TrackerCreatorTableViewHelper: NSObject, UITableViewDelegate, UITabl
         checkMarkedElementName = name
     }
     
-    private func markCell(cell: TrackerCreatorTableViewCell) {
+    private func markCell(cell: CustomTableViewCell) {
         if let lastCheckedCell = checkMarkedElement {
             lastCheckedCell.accessoryView = .none
         }

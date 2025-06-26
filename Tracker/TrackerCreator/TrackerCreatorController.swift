@@ -17,6 +17,11 @@ enum TrackerType {
 
 final class TrackerCreatorController: UIViewController {
     
+    enum CreatorMode {
+        case create
+        case edit
+    }
+    
     enum CollectionHeaderNames: String {
         case emojiCollection = "Emoji"
         case colorCollection = "Цвет"
@@ -27,7 +32,30 @@ final class TrackerCreatorController: UIViewController {
         case tableViewScheduleCell = "Расписание"
     }
     
+    private enum LocalizableText: String {
+        case trackerCreatorHeaderTitle
+        case tableViewCategoryCellTitle
+        case tableViewScheduleCellTitle
+        
+        func getLocalizedText() -> String {
+            NSLocalizedString(self.rawValue, value: self.getDefaultText(), comment: "")
+        }
+        
+        func getDefaultText() -> String {
+            switch self {
+            case .trackerCreatorHeaderTitle:
+                return "Новая привычка"
+            case .tableViewCategoryCellTitle:
+                return "Категория"
+            case .tableViewScheduleCellTitle:
+                return "Расписание"
+            }
+        }
+    }
+    
     let trackerCreatorType: TrackerType
+    
+    let creatorMode: CreatorMode
     
     var trackerStorage: TrackerStorageProtocol?
     
@@ -36,6 +64,10 @@ final class TrackerCreatorController: UIViewController {
     var emojiPicked: String?
     var colorPicked: UIColor?
     var nameCreated: String = ""
+    
+    private var trackerOldId: UUID?
+    private var trackerOldCategory: String?
+    private let streakCount: Int?
     
     private weak var delegate: TrackerCreatorControllerDelegate?
     
@@ -52,7 +84,17 @@ final class TrackerCreatorController: UIViewController {
     
     private lazy var header: UILabel = {
         let header = UILabel()
-        header.text = "Новая привычка"
+        
+        let name = {
+            switch creatorMode {
+            case .create:
+                return "Новая привычка"
+            case .edit:
+                return "Редактирование привычки"
+            }
+        }()
+        
+        header.text = name
         header.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         return header
     }()
@@ -79,6 +121,8 @@ final class TrackerCreatorController: UIViewController {
         let textField = CustomTextField()
     
         textField.placeholder = "Введите название трекера"
+        
+        textField.text = nameCreated
         
         textField.addTarget(nil, action: #selector(trackerNameTextFieldDidChange), for: .editingChanged)
         
@@ -131,7 +175,16 @@ final class TrackerCreatorController: UIViewController {
     private lazy var createButton: CustomButton  = {
         
         let createButton = CustomButton()
-        createButton.setTitle("Создать", for: .normal)
+
+        let name = {
+            switch creatorMode {
+            case .create:
+                return "Создать"
+            case .edit:
+                return "Сохранить"
+            }
+        }()
+        createButton.setTitle(name, for: .normal)
         createButton.isEnabled = false
         
         createButton.addTarget(nil, action: #selector(createButtonPressed), for: .touchUpInside)
@@ -161,17 +214,47 @@ final class TrackerCreatorController: UIViewController {
         return scrollView
     }()
     
+    private lazy var streakLabel: UILabel = {
+        let label = UILabel()
+        
+        label.font = UIFont.systemFont(ofSize: 32, weight: .bold)
+        label.textColor = .ypBlack
+        label.textAlignment = .center
+        label.numberOfLines = 0
+        
+        let count = streakCount ?? 0
+        
+        let text = getDayCountString(number: count)
+        label.text = "\(count) \(text)"
+        
+        return label
+    }()
+    
     private var emojiHelper: TrackerCreatorCollectionHelper<String>?
     
     private var colorHelper: TrackerCreatorCollectionHelper<UIColor>?
     
-    private var tableViewHelper: TrackerCreatorTableViewHelper?
+    private var tableViewHelper: CustomTableViewHelper?
     
-    init(trackerCreatorType: TrackerType, trackerStorage: TrackerStorageProtocol? = TrackerStorage.shared, delegate: TrackerCreatorControllerDelegate? = nil) {
+    init(trackerCreatorType: TrackerType, creatorMode: CreatorMode = .create, trackerId: UUID? = nil, streakCount: Int? = nil, trackerStorage: TrackerStorageProtocol? = TrackerStorage.shared, delegate: TrackerCreatorControllerDelegate? = nil) {
         self.trackerStorage = trackerStorage
         self.trackerCreatorType = trackerCreatorType
         self.delegate = delegate
+        self.creatorMode = creatorMode
+        self.streakCount = streakCount
+        
         super.init(nibName: nil, bundle: nil)
+        
+        if let trackerId, creatorMode == .edit {
+            let trackerAndCategory = trackerStorage?.getTracker(id: trackerId)
+            self.categoryPicked = trackerAndCategory?.category
+            self.nameCreated = trackerAndCategory?.tracker.name ?? ""
+            self.daysOfWeekPicked = trackerAndCategory?.tracker.schedule ?? []
+            self.emojiPicked = trackerAndCategory?.tracker.emoji
+            self.colorPicked = trackerAndCategory?.tracker.color
+            self.trackerOldId = trackerAndCategory?.tracker.id
+            self.trackerOldCategory = trackerAndCategory?.category
+        }
     }
     
     @available(*, unavailable)
@@ -203,23 +286,40 @@ final class TrackerCreatorController: UIViewController {
         
         setFullView(for: scrollView, baseView: view)
         
-        setScrollViewTopElement(scrollView: scrollView, element: trackerNameTextField, spacing: elementSpacing, overrideTopInset: 0)
+        switch creatorMode {
+        case .create:
+            setScrollViewTopElement(scrollView: scrollView, element: trackerNameTextField, spacing: elementSpacing, overrideTopInset: 0)
+        case .edit:
+            setScrollViewTopElement(scrollView: scrollView, element: streakLabel, spacing: elementSpacing, overrideTopInset: 0, overrideHeight: 38)
+            
+            _ = setScrollViewElement(scrollView: scrollView, under: streakLabel, element: trackerNameTextField, spacing: elementSpacing, overrideTopInset: 40)
+        }
         
         maxLengthWarningLabelConstraints = setScrollViewElement(scrollView: scrollView, under: trackerNameTextField, element: maxLengthWarningLabel, spacing: nil)
         
-        tableViewHelper = TrackerCreatorTableViewHelper(tableView: tableView, elements: tableViewElements, spacing: elementSpacing, delegate: self, accessoryType: .disclosure)
+        let underElements = {
+            let category = categoryPicked ?? ""
+            let days = convertDaysIntToString(days: daysOfWeekPicked)
+            
+            switch trackerCreatorType {
+            case .regular:
+                return [category, days]
+            case .unRegular:
+                return [category]
+            }
+        }()
+        
+        tableViewHelper = CustomTableViewHelper(tableView: tableView, elements: tableViewElements, underElements: underElements, spacing: elementSpacing, delegate: self, accessoryType: .disclosure)
         
         _ = setScrollViewElement(scrollView: scrollView, under: maxLengthWarningLabel, element: tableView, spacing: elementSpacing, overrideHeight: elementSpacing.elementHeight * CGFloat(tableViewElements.count))
         
-        emojiHelper = TrackerCreatorCollectionHelper(headerTitle: CollectionHeaderNames.emojiCollection.rawValue, elements: emojiArray, spacing: collectionSpacing, collection: emojiCollectionView, delegate: self)
-        
-        // MARK: возможно, стоит просчитывать и задавать констрейт высоты коллекции внутри хелпера, поскольку у него есть достаточно информации для определения?
+        emojiHelper = TrackerCreatorCollectionHelper(headerTitle: CollectionHeaderNames.emojiCollection.rawValue, elements: emojiArray, selectedElement: emojiPicked, spacing: collectionSpacing, collection: emojiCollectionView, delegate: self)
         
         let totalEmojiCollectionHeight = getCollectionHeight(for: view, collectionSpacing: collectionSpacing, elementsCount: emojiArray.count)
         
         _ = setScrollViewElement(scrollView: scrollView, under: tableView, element: emojiCollectionView, spacing: nil, overrideTopInset: 32 ,overrideHeight: totalEmojiCollectionHeight)
         
-        colorHelper = TrackerCreatorCollectionHelper(headerTitle: CollectionHeaderNames.colorCollection.rawValue, elements: colorArray, spacing: collectionSpacing, collection: colorCollectionView, delegate: self)
+        colorHelper = TrackerCreatorCollectionHelper(headerTitle: CollectionHeaderNames.colorCollection.rawValue, elements: colorArray, selectedElement: colorPicked, spacing: collectionSpacing, collection: colorCollectionView, delegate: self)
         
         let totalColorCollectionHeight = getCollectionHeight(for: view, collectionSpacing: collectionSpacing, elementsCount: colorArray.count)
         
@@ -228,6 +328,19 @@ final class TrackerCreatorController: UIViewController {
         setScrollViewBottomElement(scrollView: scrollView, under: colorCollectionView, element: buttonsView, spacing: elementSpacing, overrideTopInset: 16, overrideLeftInset: 20, overrideRightInset: 20, overrideHeight: 60)
         
         setButtonsView(spaceBetweenButtons: 8)
+        
+        checkToAllowCreateButton()
+    }
+    
+    private func getDayCountString(number: Int) -> String {
+        switch number {
+        case 1:
+            return "день"
+        case 2, 3, 4:
+            return "дня"
+        default:
+            return "дней"
+        }
     }
     
     private func setNavBar() {
@@ -372,6 +485,25 @@ final class TrackerCreatorController: UIViewController {
         }
     }
     
+    private func convertDaysIntToString(days: [Int]) -> String {
+        if days.count == 7 {
+            return "Каждый день"
+        } else {
+            var daysString: String = ""
+            for day in days.dropLast() {
+                let dayString = DayOfWeek(rawValue: day)?.shortName ?? ""
+                daysString += "\(dayString), "
+            }
+            guard let last = days.last else {
+                return ""
+            }
+            let lastDayString = DayOfWeek(rawValue: last)?.shortName ?? ""
+            daysString += "\(lastDayString)"
+            
+            return daysString
+        }
+    }
+    
     @objc
     private func cancelButtonPressed() {
         self.dismiss(animated: true)
@@ -399,8 +531,6 @@ final class TrackerCreatorController: UIViewController {
             trackerNameTextField.text = trimmedName
             nameCreated = trimmedName
             
-//          Изначальная задумка подразумевала существование maxLengthWarningLabel внутри UIView вместе с trackerNameTextField, однако это привело к необходимости сильно модернизировать код и вводить дополнительные функции, поэтому было принято решение сделать лейбл ошибки и текстовое поле отдельными друг от друга, несмотря на то, что высота лейбла ошибки теперь отвечает в том числе и за отступы
-            
             if maxLengthWarningLabel.isHidden {
                 maxLengthWarningLabelConstraints = changeElementConstraints(stickTo: scrollView, under: trackerNameTextField, element: maxLengthWarningLabel, oldConstraints: maxLengthWarningLabelConstraints, spacing: nil, overrideLeftInset: elementSpacing.leftInset + 28, overrideRightInset: elementSpacing.rightInset + 28, overrideHeight: 22 + 8 + 8)
                 
@@ -422,16 +552,25 @@ final class TrackerCreatorController: UIViewController {
         if trackerCreatorType == .regular {
             guard !daysOfWeekPicked.isEmpty else { return }
         }
-
-        trackerStorage?.addTrackerToCategory(name: nameCreated, color: colorPicked, emoji: emojiPicked, schedule: daysOfWeekPicked, category: categoryPicked)
         
+        switch creatorMode {
+        case .create:
+            trackerStorage?.addTrackerToCategory(name: nameCreated, color: colorPicked, emoji: emojiPicked, schedule: daysOfWeekPicked, category: categoryPicked)
+        case .edit:
+            guard let trackerOldId else { return }
+            
+            let tracker = Tracker(id: trackerOldId, name: nameCreated, color: colorPicked, emoji: emojiPicked, schedule: daysOfWeekPicked)
+            trackerStorage?.updateTracker(tracker: tracker, newCategory: categoryPicked == trackerOldCategory ? nil : categoryPicked )
+        }
         delegate?.trackerWasCreated()
+        
+        self.dismiss(animated: true)
     }
 }
 
 extension TrackerCreatorController: TrackerCreatorDatePickerDelegate {
-    func receivePickedDays(days: [(dayOfWeekNum: Int, nameOfDay: String)]) {
-        daysOfWeekPicked = days.map({$0.dayOfWeekNum})
+    func receivePickedDays(days: [Int]) {
+        daysOfWeekPicked = days
         
         tableView.beginUpdates()
         let cells = tableView.visibleCells
@@ -443,7 +582,8 @@ extension TrackerCreatorController: TrackerCreatorDatePickerDelegate {
         } else {
             var daysString: String = ""
             for day in days.dropLast() {
-                daysString += "\(day.nameOfDay), "
+                let dayString = DayOfWeek(rawValue: day)?.shortName ?? ""
+                daysString += "\(dayString), "
             }
             guard let last = days.last else {
                 cell.detailTextLabel?.text = nil
@@ -451,7 +591,8 @@ extension TrackerCreatorController: TrackerCreatorDatePickerDelegate {
                 checkToAllowCreateButton()
                 return
             }
-            daysString += "\(last.nameOfDay)"
+            let lastDayString = DayOfWeek(rawValue: last)?.shortName ?? ""
+            daysString += "\(lastDayString)"
 
             cell.detailTextLabel?.text = daysString
         }
@@ -475,7 +616,7 @@ extension TrackerCreatorController: TrackerCreatorCategoryPickerDelegate {
     }
 }
 
-extension TrackerCreatorController: TrackerCreatorTableViewHelperDelegate {
+extension TrackerCreatorController: CustomTableViewHelperDelegate {
     func cellWasPressed(withHeader header: String) {
         
         guard let header = TableViewHeaderNames(rawValue: header) else { return }
@@ -499,7 +640,6 @@ extension TrackerCreatorController: TrackerCreatorTableViewHelperDelegate {
             
             self.present(navBar, animated: true)
         }
-
     }
 }
 

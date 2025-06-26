@@ -10,6 +10,8 @@ import UIKit
 final class TrackerCreatorCollectionHelper <T>: NSObject, UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     
     private var elements: [T]
+    private var selectedElement: T?
+    private var selectedElementIndexPath: IndexPath?
     private var spacing: CollectionSpacing
     private var headerTitle: String
     private var collectionView: UICollectionView
@@ -18,12 +20,13 @@ final class TrackerCreatorCollectionHelper <T>: NSObject, UICollectionViewDelega
     
     private weak var delegate: TrackerCreatorCollectionHelperDelegate?
     
-    init(headerTitle: String, elements: [T], spacing: CollectionSpacing, collection: UICollectionView, delegate: TrackerCreatorCollectionHelperDelegate? = nil) {
+    init(headerTitle: String, elements: [T], selectedElement: T? = nil, spacing: CollectionSpacing, collection: UICollectionView, delegate: TrackerCreatorCollectionHelperDelegate? = nil) {
         self.elements = elements
         self.spacing = spacing
         self.headerTitle = headerTitle
         self.collectionView = collection
         self.delegate = delegate
+        self.selectedElement = selectedElement
         super.init()
         
         collectionView.dataSource = self
@@ -42,6 +45,27 @@ final class TrackerCreatorCollectionHelper <T>: NSObject, UICollectionViewDelega
         return elementSize * totalRows + spacing.topInset + spacing.bottomInset + spacing.spaceBetweenElementsInColumn * totalRows
     }
     
+    func selectItemInsideCollection(item: T) {
+        if let colors = elements as? [UIColor], let selectedColor = item as? UIColor, let index = colors.firstIndex(of: selectedColor) {
+            
+            let indexPath = IndexPath(item: index, section: 0)
+            
+            selectedElementIndexPath = indexPath
+            
+            collectionView.selectItem(at: selectedElementIndexPath, animated: true, scrollPosition: [])
+            self.collectionView(collectionView, didSelectItemAt: indexPath)
+            
+        } else if let strings = elements as? [String], let selectedString = item as? String, let index = strings.firstIndex(of: selectedString) {
+            
+            let indexPath = IndexPath(row: index, section: 0)
+            
+            selectedElementIndexPath = indexPath
+            
+            collectionView.selectItem(at: selectedElementIndexPath, animated: true, scrollPosition: [])
+            self.collectionView(collectionView, didSelectItemAt: indexPath)
+        }
+    }
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         elements.count
     }
@@ -54,8 +78,30 @@ final class TrackerCreatorCollectionHelper <T>: NSObject, UICollectionViewDelega
         
         if let cellText = elements[indexPath.row] as? String {
             cell.textLabel.text = cellText
+            
+            if let selectedElement = selectedElement as? String, selectedElement == cellText {
+                selectCell(cell: cell, indexPath: indexPath)
+                collectionView.selectItem(at: indexPath, animated: true, scrollPosition: [])
+                self.collectionView(collectionView, didSelectItemAt: indexPath)
+            }
+            
         } else if let cellColor = elements[indexPath.row] as? UIColor {
             cell.contentView.backgroundColor = cellColor
+            
+            guard let selectedColor = selectedElement as? UIColor else { return cell }
+            
+            let marshal = ColorMarshal()
+            
+            let selectedColorHex = marshal.getHexFromUIColor(color: selectedColor)
+            
+            let cellColorHex = marshal.getHexFromUIColor(color: cellColor)
+            
+            if selectedColorHex == cellColorHex {
+                selectCell(cell: cell, indexPath: indexPath)
+                collectionView.selectItem(at: indexPath, animated: true, scrollPosition: [])
+                self.collectionView(collectionView, didSelectItemAt: indexPath)
+            }
+            
         } else {
             return UICollectionViewCell()
         }
@@ -96,7 +142,7 @@ final class TrackerCreatorCollectionHelper <T>: NSObject, UICollectionViewDelega
         return CGSize(width: collectionView.bounds.width, height: CustomCollectionHeader.getRequiredHeight)
     }
     
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {        
         let cell = collectionView.cellForItem(at: indexPath)
         guard let color = elements[indexPath.row] as? UIColor else {
     
@@ -117,5 +163,22 @@ final class TrackerCreatorCollectionHelper <T>: NSObject, UICollectionViewDelega
         cell?.backgroundColor = nil
         cell?.layer.borderWidth = 0
         cell?.layer.borderColor = nil
+    }
+    
+    func deselectCell(cell: TrackerCreatorCollectionCell?) {
+        cell?.backgroundColor = nil
+        cell?.layer.borderWidth = 0
+        cell?.layer.borderColor = nil
+    }
+    
+    func selectCell(cell: TrackerCreatorCollectionCell?, indexPath: IndexPath) {
+        guard let color = elements[indexPath.row] as? UIColor else {
+            guard let text = elements[indexPath.row] as? String else { return }
+            cell?.backgroundColor = .ypLightGray
+            delegate?.cellWasPressed(content: text)
+            return
+        }
+        cell?.layer.borderWidth = 3
+        cell?.layer.borderColor = color.withAlphaComponent(0.3).cgColor
     }
 }

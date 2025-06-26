@@ -9,6 +9,24 @@
 import UIKit
  
 final class TabBarController: UITabBarController {
+    
+    private enum LocalizableText: String {
+        case trackerTitle
+        case statsTitle
+        
+        func getLocalizedText() -> String {
+            NSLocalizedString(self.rawValue, value: self.getDefaultText(), comment: "")
+        }
+        
+        func getDefaultText() -> String {
+            switch self {
+            case .trackerTitle:
+                return "Трекеры"
+            case .statsTitle:
+                return "Статистика"
+            }
+        }
+    }
         
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -17,23 +35,31 @@ final class TabBarController: UITabBarController {
         
         let trackerViewController = TrackerViewController()
         
+        let trackerTitle = LocalizableText.trackerTitle.getLocalizedText()
+        
         trackerViewController.tabBarItem = UITabBarItem(
-            title: "Трекеры",
+            title: trackerTitle,
             image: UIImage(named: "TabBarTrackerIcon"),
             selectedImage: nil)
         
         let statsViewController = StatsViewController()
         
+        let statsTitle = LocalizableText.statsTitle.getLocalizedText()
+        
         statsViewController.tabBarItem = UITabBarItem(
-            title: "Статистика",
+            title: statsTitle,
             image: UIImage(named: "TabBarStatsIcon"),
             selectedImage: nil)
         
-        let nav = UINavigationController(rootViewController: trackerViewController)
+        let navTracker = UINavigationController(rootViewController: trackerViewController)
     
-        nav.setupNavigationAppearance()
+        navTracker.setupNavigationAppearance()
         
-        self.viewControllers = [nav, statsViewController]
+        let navStats = UINavigationController(rootViewController: statsViewController)
+        
+        navStats.setupNavigationAppearance()
+        
+        self.viewControllers = [navTracker, navStats]
         
     }
     

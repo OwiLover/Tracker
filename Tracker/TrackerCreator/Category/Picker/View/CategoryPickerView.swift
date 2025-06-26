@@ -15,7 +15,7 @@ final class CategoryPickerViewController: UIViewController {
     
     private weak var delegate: TrackerCreatorCategoryPickerDelegate?
     
-    private var tableViewHelper: TrackerCreatorTableViewHelper?
+    private var tableViewHelper: CustomTableViewHelper?
     
     private lazy var categoryTableView: UITableView = {
         let tableView = UITableView()
@@ -108,9 +108,10 @@ final class CategoryPickerViewController: UIViewController {
         }
         
         let array = viewModel.categoriesArray
+        
         !array.isEmpty ? showCategoryTableView() : showCategoriesAreEmpty()
         
-        tableViewHelper = TrackerCreatorTableViewHelper(tableView: categoryTableView, elements: array, delegate: self, accessoryType: .checkmark)
+        tableViewHelper = CustomTableViewHelper(tableView: categoryTableView, elements: array, delegate: self, accessoryType: .checkmark)
         tableViewHelper?.setMarkedElement(withName: viewModel.pickedCategory)
     }
     
@@ -224,7 +225,7 @@ final class CategoryPickerViewController: UIViewController {
     }
 }
 
-extension CategoryPickerViewController: TrackerCreatorTableViewHelperDelegate {
+extension CategoryPickerViewController: CustomTableViewHelperDelegate {
     func cellWasPressed(withHeader header: String) {
         delegate?.receiveCategoryName(name: header)
         self.dismiss(animated: true)

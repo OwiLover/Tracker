@@ -104,7 +104,6 @@ final class TrackerCreatorPickerController: UIViewController {
     @objc
     private func unRegularButtonTapped() {
         let trackerController = TrackerCreatorController(trackerCreatorType: .unRegular, delegate: self)
-        
         let navBar = UINavigationController(rootViewController: trackerController)
         present(navBar, animated: true)
     }

@@ -9,6 +9,33 @@ import UIKit
 
 final class TrackerViewCollectionCustomCell: UICollectionViewCell {
     
+    private enum LocalizableText: String {
+        case streakDaysCount
+        case actionMenuPinTrackerTitle
+        case actionMenuUnpinTrackerTitle
+        case actionMenuUpdateTrackerTitle
+        case actionMenuDeleteTrackerTitle
+        
+        func getLocalizedText() -> String {
+            NSLocalizedString(self.rawValue, value: self.getDefaultText(), comment: "")
+        }
+        
+        func getDefaultText() -> String {
+            switch self {
+            case .actionMenuPinTrackerTitle:
+                return "Закрепить"
+            case .actionMenuUnpinTrackerTitle:
+                return "Открепить"
+            case .actionMenuUpdateTrackerTitle:
+                return "Редактировать"
+            case .actionMenuDeleteTrackerTitle:
+                return "Удалить"
+            case .streakDaysCount:
+                return "дней"
+            }
+        }
+    }
+    
     static let identifier = "TrackerViewCellIdentifier"
     
     static var designedHeight: CGFloat {
@@ -26,6 +53,8 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
     private var streakCount: UInt16 = 0
     
     private var id: UUID?
+    
+    private var isPinned: Bool?
 
     weak var delegate: TrackerViewCollectionCustomCellDelegate?
     
@@ -37,6 +66,8 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
         view.layer.borderWidth = 1
         view.layer.borderColor = UIColor.ypGray.withAlphaComponent(0.3).cgColor
         
+        view.isUserInteractionEnabled = true
+        
         return view
     }()
     
@@ -45,6 +76,12 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
         label.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         label.textAlignment = .center
         return label
+    }()
+    
+    private lazy var pinImageView: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "PinImageIcon"))
+
+        return imageView
     }()
     
     private lazy var emojiLabelView: UIView = {
@@ -125,6 +162,7 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
         super.prepareForReuse()
         id = nil
         streakCount = 0
+        isPinned = nil
     }
     
     @available(*, unavailable)
@@ -133,26 +171,44 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
         super.init(coder: coder)
     }
     
-    func setupCell(id: UUID, emoji: String, name: String, backgroundColor: UIColor, streakCount: UInt16 = 0, delegate: TrackerViewCollectionCustomCellDelegate? = nil, isEnabled: Bool, isSelected: Bool = false) {
+    func setupCell(id: UUID, emoji: String, name: String, backgroundColor: UIColor, streakCount: UInt16 = 0, delegate: TrackerViewCollectionCustomCellDelegate? = nil, isEnabled: Bool, isSelected: Bool = false, isPinned: Bool) {
         self.id = id
         emojiLabel.text = emoji
         trackerNameLabel.text = name
         trackerCardView.backgroundColor = backgroundColor
         self.streakCount = streakCount
+        self.isPinned = isPinned
         
         streakButton.backgroundColor = isEnabled && !isSelected ? backgroundColor : backgroundColor.withAlphaComponent(0.3)
         
-        streakLabel.text = "\(streakCount) \(getDayCountString(number: streakCount))"
+        streakLabel.text = String.localizedStringWithFormat(LocalizableText.streakDaysCount.getLocalizedText(), streakCount)
         
         streakButton.isEnabled = isEnabled
         
         streakButton.isSelected = isSelected
         
+        let interaction = UIContextMenuInteraction(delegate: self)
+        trackerCardView.addInteraction(interaction)
+        
+        isPinned ? showPinImageView() : hidePinImageView()
+        
         self.delegate = delegate
+    }
+    
+    func getTrackerCardView() -> UIView {
+        return trackerCardView
     }
     
     private func setStreakButtonAction(action: Selector) {
         streakButton.addTarget(nil, action: action, for: .touchUpInside)
+    }
+    
+    private func showPinImageView() {
+        pinImageView.isHidden = false
+    }
+    
+    private func hidePinImageView() {
+        pinImageView.isHidden = true
     }
     
     private func setTrackerCard() {
@@ -169,9 +225,13 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
         
         trackerCardView.addSubview(trackerNameView)
         
+        trackerCardView.addSubview(pinImageView)
+        
         trackerNameView.translatesAutoresizingMaskIntoConstraints = false
         
         emojiLabelView.translatesAutoresizingMaskIntoConstraints = false
+        
+        pinImageView.translatesAutoresizingMaskIntoConstraints = false
         
         contentView.addSubview(trackerCardView)
         
@@ -191,6 +251,11 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
             
             emojiLabel.centerYAnchor.constraint(equalTo: emojiLabelView.centerYAnchor),
             emojiLabel.centerXAnchor.constraint(equalTo: emojiLabelView.centerXAnchor),
+            
+            pinImageView.topAnchor.constraint(equalTo: trackerCardView.topAnchor, constant: spacing.top),
+            pinImageView.trailingAnchor.constraint(equalTo: trackerCardView.trailingAnchor, constant: -spacing.left),
+            pinImageView.heightAnchor.constraint(equalToConstant: 24),
+            pinImageView.widthAnchor.constraint(equalToConstant: 24),
             
             trackerNameView.topAnchor.constraint(equalTo: emojiLabelView.bottomAnchor, constant: elementSpacing),
             trackerNameView.leadingAnchor.constraint(equalTo: trackerCardView.leadingAnchor, constant: spacing.left),
@@ -253,7 +318,7 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
         if streakButton.isSelected {
             
             streakCount -= 1
-            streakLabel.text = "\(streakCount) \(getDayCountString(number: streakCount))"
+            streakLabel.text = String.localizedStringWithFormat( LocalizableText.streakDaysCount.getLocalizedText(), streakCount)
             
             UIView.animate(withDuration: 0.25) { [weak self] in
                 guard let self else { return }
@@ -262,7 +327,7 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
         } else {
             
             streakCount += 1
-            streakLabel.text = "\(streakCount) \(getDayCountString(number: streakCount))"
+            streakLabel.text = String.localizedStringWithFormat( LocalizableText.streakDaysCount.getLocalizedText(), streakCount)
             
             UIView.animate(withDuration: 0.25) { [weak self] in
                 guard let self else { return }
@@ -273,5 +338,36 @@ final class TrackerViewCollectionCustomCell: UICollectionViewCell {
         streakButton.isSelected.toggle()
     
         delegate?.streakButtonWasPressed(buttonState: streakButton.isSelected, trackerId: id)
+    }
+}
+
+extension TrackerViewCollectionCustomCell: UIContextMenuInteractionDelegate {
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        guard let id, let isPinned else { return nil }
+
+        let pinActionString = LocalizableText.actionMenuPinTrackerTitle.getLocalizedText()
+        let unpinActionString = LocalizableText.actionMenuUnpinTrackerTitle.getLocalizedText()
+        let updateActionString = LocalizableText.actionMenuUpdateTrackerTitle.getLocalizedText()
+        let deleteActionString = LocalizableText.actionMenuDeleteTrackerTitle.getLocalizedText()
+        let deleteUIAction = UIAction(title: deleteActionString, attributes: .destructive) { [weak self] _ in
+            self?.delegate?.actionMenuDeleteButtonWasPressed(trackerId: id)
+        }
+        
+        let menu = UIMenu(children: [
+            UIAction(title: isPinned ? unpinActionString : pinActionString) { [weak self] _ in
+                guard let self else { return }
+                isPinned ? self.delegate?.actionMenuUnpinButtonWasPressed(trackerId: id) : self.delegate?.actionMenuPinButtonWasPressed(trackerId: id)
+                isPinned ? print("Unpinned") : print("Pinned")
+            },
+            UIAction(title: updateActionString) { [weak self] _ in
+                guard let self else { return }
+                self.delegate?.actionMenuEditButtonWasPressed(trackerId: id)
+            },
+            deleteUIAction,
+        ])
+        
+        let config = UIContextMenuConfiguration(actionProvider: { _ in menu })
+        
+        return config
     }
 }

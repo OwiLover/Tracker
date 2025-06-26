@@ -58,9 +58,48 @@ final class TrackerViewCollectionHelper: NSObject, UICollectionViewDelegate, UIC
         let streakCount: UInt16 = recordsDictionary?.streakCount ?? 0
         let isChecked = recordsDictionary?.isChecked ?? false
         
-        cell.setupCell(id: element.id, emoji: element.emoji, name: element.name, backgroundColor: element.color, streakCount: streakCount, delegate: self, isEnabled: isCurrentDay, isSelected: isChecked)
+        cell.setupCell(id: element.id, emoji: element.emoji, name: element.name, backgroundColor: element.color, streakCount: streakCount, delegate: self, isEnabled: isCurrentDay, isSelected: isChecked, isPinned: element.isPinned)
         
         return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemsAt indexPaths: [IndexPath], point: CGPoint) -> UIContextMenuConfiguration? {
+//        guard let indexPath = indexPaths.first else { return nil }
+//        
+//        let selectedTracker = elements[indexPath.section].array[indexPath.row]
+//        
+//        let id = selectedTracker.id
+//        
+//        print(selectedTracker.isPinned)
+//        
+//        let isPinned = selectedTracker.isPinned
+//        
+//        let pinActionString = LocalizableText.actionMenuPinTrackerTitle.getLocalizedText()
+//        
+//        let unpinActionString = LocalizableText.actionMenuUnpinTrackerTitle.getLocalizedText()
+//        
+//        let updateActionString = LocalizableText.actionMenuUpdateTrackerTitle.getLocalizedText()
+//        
+//        let deleteActionString = LocalizableText.actionMenuDeleteTrackerTitle.getLocalizedText()
+//        
+//        let deleteUIAction = UIAction(title: deleteActionString, attributes: .destructive) { [weak self] _ in
+//            self?.delegate?.deleteTracker(trackerId: id)
+//        }
+//        
+//        let menu = UIMenu(children: [
+//            UIAction(title: isPinned ? unpinActionString : pinActionString) { [weak self] _ in
+//                isPinned ? self?.delegate?.unpinTracker(trackerId: id) : self?.delegate?.pinTracker(trackerId: id)
+//                isPinned ? print("Unpinned") : print("Pinned")
+//            },
+//            UIAction(title: updateActionString) { [weak self] _ in
+//                self?.delegate?.editTracker(trackerId: id)
+//            },
+//            deleteUIAction,
+//        ])
+//        
+//        let config = UIContextMenuConfiguration(actionProvider: { _ in menu })
+        
+        return nil
     }
     
     func reloadCollection(newElements: [TrackerCategory], isCurrentDay: Bool) {
@@ -72,6 +111,10 @@ final class TrackerViewCollectionHelper: NSObject, UICollectionViewDelegate, UIC
     func updateElementRecords(elementRecordDictionary: TrackerRecordDictionary) {
         self.elementsRecord = elementRecordDictionary
     }
+    
+    private func deleteElement(indexPath: IndexPath) {
+        
+    }
 }
 
 extension TrackerViewCollectionHelper: UICollectionViewDelegateFlowLayout {
@@ -82,7 +125,12 @@ extension TrackerViewCollectionHelper: UICollectionViewDelegateFlowLayout {
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
-        return UIEdgeInsets(top: spacing.topInset, left: spacing.leftInset, bottom: spacing.bottomInset, right: spacing.rightInset)
+        var insets = UIEdgeInsets(top: spacing.topInset, left: spacing.leftInset, bottom: spacing.bottomInset, right: spacing.rightInset)
+        if section == elements.count - 1 {
+            insets.bottom = insets.bottom + CustomFilterButton.designedHeight
+            return insets
+        }
+        return insets
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
@@ -115,7 +163,24 @@ extension TrackerViewCollectionHelper: UICollectionViewDelegateFlowLayout {
 }
 
 extension TrackerViewCollectionHelper: TrackerViewCollectionCustomCellDelegate {
+    func actionMenuDeleteButtonWasPressed(trackerId: UUID) {
+        delegate?.deleteTracker(trackerId: trackerId)
+    }
+    
+    func actionMenuEditButtonWasPressed(trackerId: UUID) {
+        delegate?.editTracker(trackerId: trackerId)
+    }
+    
+    func actionMenuPinButtonWasPressed(trackerId: UUID) {
+        delegate?.pinTracker(trackerId: trackerId)
+    }
+    
+    func actionMenuUnpinButtonWasPressed(trackerId: UUID) {
+        delegate?.unpinTracker(trackerId: trackerId)
+    }
+    
     func streakButtonWasPressed(buttonState: Bool, trackerId: UUID) {
         delegate?.updateStreak(shouldIncrease: buttonState, trackerId: trackerId)
     }
 }
+

@@ -7,6 +7,6 @@
 
 import Foundation
 
-protocol TrackerCreatorTableViewHelperDelegate: AnyObject {
+protocol CustomTableViewHelperDelegate: AnyObject {
     func cellWasPressed(withHeader header: String)
 }
