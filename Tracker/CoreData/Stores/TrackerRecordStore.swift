@@ -185,6 +185,22 @@ final class TrackerRecordStore: NSObject {
         }
         return idSet
     }
+    
+    func getRecordsCount(trackerId: UUID) -> Int? {
+        guard let context, let keyPath = (\TrackerRecordCoreData.id)._kvcKeyPathString else {
+            print("no context or wrong keyPath!")
+            return nil
+        }
+        let fetchRequest = TrackerRecordCoreData.fetchRequest()
+        
+        fetchRequest.predicate = NSPredicate(format: "%K == %@", keyPath, trackerId as NSUUID)
+        
+        var counter = 0
+        if let result = try? context.fetch(fetchRequest) {
+            counter = result.count
+        }
+        return counter
+    }
 }
 
 extension TrackerRecordStore: NSFetchedResultsControllerDelegate {

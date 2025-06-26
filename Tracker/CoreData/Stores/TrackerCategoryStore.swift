@@ -19,10 +19,28 @@ protocol TrackerCategoryStoreProtocol {
 
 final class TrackerCategoryStore: NSObject, TrackerCategoryStoreProtocol {
     
+    private enum LocalizableText: String {
+        case pinnedCategoryName
+        
+        func getLocalizedText() -> String {
+            NSLocalizedString(self.rawValue, value: self.getDefaultText(), comment: "")
+        }
+        
+        func getDefaultText() -> String {
+            switch self {
+            case .pinnedCategoryName:
+                return "Закрепленные"
+
+            }
+        }
+    }
+    
     var fetchedElements: [TrackerCategory] {
         guard let elements = fetchController?.fetchedObjects else { return [] }
         
-        return elements.compactMap{ element in
+        var pinnedTrackers: [Tracker] = []
+        
+        var result: [TrackerCategory] = elements.compactMap { element in
             guard let category = element.category, let trackers = element.trackers else { assertionFailure("Can't convert something in TrackerCategory!")
                 return nil
             }
@@ -31,17 +49,28 @@ final class TrackerCategoryStore: NSObject, TrackerCategoryStoreProtocol {
             
             let trackerArrayCD = trackers.allObjects as? [TrackerCoreData] ?? []
             
-            let trackerArray = trackerArrayCD.compactMap { trackerCD in
+            let trackerArray: [Tracker] = trackerArrayCD.compactMap { trackerCD in
                 guard let id = trackerCD.id, let name = trackerCD.name,
                       let color = trackerCD.color, let emoji = trackerCD.emoji,
                       let schedule = trackerCD.schedule else { fatalError("Can't convert TrackerCD to normal data!")
                 }
-                let tracker = Tracker(id: id, name: name, color: marshal.getUIColorFromHex(hex: color), emoji: emoji, schedule: schedule)
+                let tracker = Tracker(id: id, name: name, color: marshal.getUIColorFromHex(hex: color), emoji: emoji, schedule: schedule, isPinned: trackerCD.isPinned)
+                
+                if tracker.isPinned {
+                    pinnedTrackers.append(tracker)
+                    return nil
+                }
                 return tracker
             }
             
             return TrackerCategory(category: category, array: trackerArray)
         }
+        
+        if pinnedTrackers.count > 0 {
+            let pinnedTrackerCategory = TrackerCategory(category: LocalizableText.pinnedCategoryName.getLocalizedText(), array: pinnedTrackers)
+            result.insert(pinnedTrackerCategory, at: 0)
+        }
+        return result
     }
     
     private(set) var context: NSManagedObjectContext?
@@ -146,6 +175,43 @@ final class TrackerCategoryStore: NSObject, TrackerCategoryStoreProtocol {
         } catch {
             context.rollback()
             print("Can't add tracker to category!")
+        }
+    }
+    
+    func changeTrackersCategory(for tracker: Tracker, newCategory: String) throws {
+        guard let context, let categoryKeyPath = (\TrackerCategoryCoreData.category)._kvcKeyPathString, let trackerKeyPath = (\TrackerCoreData.id)._kvcKeyPathString else {
+            print("No context or wrong keyPath!")
+            return
+        }
+        
+        let trackerFetchRequest = TrackerCoreData.fetchRequest()
+        
+        trackerFetchRequest.predicate = NSPredicate(format: "%K == %@", trackerKeyPath, tracker.id as NSUUID)
+        trackerFetchRequest.fetchLimit = 1
+        
+        guard let trackerSearch = try? context.fetch(trackerFetchRequest), let tracker = trackerSearch.first else {
+            print("Can't update tracker's category, wrong id!")
+            return
+        }
+        
+        let fetchRequest = TrackerCategoryCoreData.fetchRequest()
+        
+        if let oldCategory = tracker.category {
+            oldCategory.removeFromTrackers(tracker)
+        }
+        
+        fetchRequest.predicate = NSPredicate(format: "%K == %@", categoryKeyPath, newCategory)
+        fetchRequest.fetchLimit = 1
+        
+        if let result = try? context.fetch(fetchRequest), let newCategory = result.first {
+            newCategory.addToTrackers(tracker)
+        }
+        
+        do {
+            try context.save()
+        } catch {
+            context.rollback()
+            print("Can't update tracker's category!")
         }
     }
     

@@ -12,6 +12,7 @@ final class TrackerStorage: TrackerStorageProtocol {
     static let shared = TrackerStorage()
     static let didAddCategory = Notification.Name(rawValue: "TrackerStorageDidAddCategory")
     static let didAddTracker = Notification.Name(rawValue: "TrackerStorageDidAddTracker")
+    static let didAddRecord = Notification.Name(rawValue: "TrackerStorageDidAddRecord")
     
     private var trackerStore: TrackerStore?
     private var trackerCategoryStore: TrackerCategoryStore?
@@ -75,6 +76,47 @@ final class TrackerStorage: TrackerStorageProtocol {
         }
     }
     
+    func deleteTracker(id: UUID) {
+        do {
+            try trackerRecordStore?.deleteRecords(id: id)
+            try trackerStore?.deleteTracker(withId: id)
+        }
+        catch {
+            print("Can't delete tracker: \(error)")
+        }
+    }
+    
+    func updateTracker(tracker: Tracker, newCategory: String? = nil) {
+        do {
+            try trackerStore?.updateExistingTracker(tracker: tracker)
+            
+            if let newCategory {
+                try trackerCategoryStore?.changeTrackersCategory(for: tracker, newCategory: newCategory)
+            }
+        }
+        catch {
+            print("Can't update tracker: \(error)")
+        }
+    }
+    
+    func getTracker(id: UUID) -> (tracker: Tracker, category: String?)? {
+        do {
+            let trackerAndCategory = try trackerStore?.getTracker(withId: id)
+            
+            return trackerAndCategory
+        } catch {
+            
+            print("Can't get tracker!")
+            
+            return nil
+        }
+    }
+    
+    func getTrackersStreakCount(id: UUID) -> Int {
+            let streak = trackerRecordStore?.getRecordsCount(trackerId: id)
+            return streak ?? 0
+    }
+    
     func markTrackerAsCompleted(id: UUID) {
         if !completedTrackerIds.contains(id) {
             completedTrackerIds.insert(id)
@@ -87,6 +129,19 @@ final class TrackerStorage: TrackerStorageProtocol {
             completedTrackerIds.remove(id)
             removeTrackerRecord(id: id)
         }
+    }
+    
+    func pinTracker(id: UUID) {
+        trackerStore?.pinTracker(withId: id)
+    }
+    
+    func unpinTracker(id: UUID) {
+        trackerStore?.unpinTracker(withId: id)
+    }
+    
+    func getTrackerWithCategoryAndDay(category: String, day: Int) -> [Tracker] {
+        guard let trackers = try? trackerStore?.getTrackersWithCategory(category: category) else { return [] }
+        return trackers.filter { $0.schedule.contains(day) }
     }
     
     private func setTrackerRecord(id: UUID) {
@@ -112,11 +167,6 @@ final class TrackerStorage: TrackerStorageProtocol {
     private func generateId() -> UUID {
         return UUID()
     }
-    
-    func getTrackerWithCategoryAndDay(category: String, day: Int) -> [Tracker] {
-        guard let trackers = try? trackerStore?.getTrackersWithCategory(category: category) else { return [] }
-        return trackers.filter { $0.schedule.contains(day) }
-    }
 }
 
 extension TrackerStorage: GlobalStoreDelegate {
@@ -126,7 +176,8 @@ extension TrackerStorage: GlobalStoreDelegate {
             NotificationCenter.default.post(name: TrackerStorage.didAddCategory, object: self, userInfo: ["Categories": self.categoriesArray, "Changes": changes])
             print("Notified Category!")
         case .record:
-            print("Got some record changes!")
+            NotificationCenter.default.post(name: TrackerStorage.didAddRecord, object: self)
+            
         case .tracker:
             NotificationCenter.default.post(name: TrackerStorage.didAddTracker, object: self, userInfo: ["Changes": changes])
         }

@@ -16,13 +16,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         // Use this method to select a configuration to create the new scene with.
         
+        
         window = UIWindow()
         
-//        if DefaultsStorage.shared.checkedOnboardView() {
-//            window?.rootViewController = TabBarController()
-//        } else {
-//            window?.rootViewController = OnboardingView()
-//        }
+        AnalyticsService.activate()
         
         return true
     }
