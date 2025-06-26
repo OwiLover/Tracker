@@ -124,9 +124,13 @@ final class StatsViewController: UIViewController {
         
         view.addSubview(emptyStatsStackView)
         
+        let searchBarHeight = navigationItem.searchController?.searchBar.bounds.height ?? 0
+        
+        print(searchBarHeight)
+        
         NSLayoutConstraint.activate([
             emptyStatsStackView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
-            emptyStatsStackView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: -53),
+            emptyStatsStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -(searchBarHeight/2)),
             emptyStatsStackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             emptyStatsStackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             emptyStatsImageView.widthAnchor.constraint(equalToConstant: 80),

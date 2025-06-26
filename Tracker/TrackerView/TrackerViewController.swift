@@ -199,6 +199,7 @@ final class TrackerViewController: UIViewController {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
         stopTypingFromSearchBar()
     }
     
@@ -301,7 +302,7 @@ final class TrackerViewController: UIViewController {
         stopTypingFromSearchBar()
         self.present(navBar, animated: true)
     }
-    
+//    MARK: попытался убрать фокус на searchController, однако крайне сомневаюсь, что она работает, многие кнопки нажимаются только после нажатия enter
     private func stopTypingFromSearchBar() {
         guard let searchController = navigationItem.searchController else { return }
         searchController.searchBar.endEditing(true)
