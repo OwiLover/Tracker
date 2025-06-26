@@ -198,6 +198,10 @@ final class TrackerViewController: UIViewController {
         analyticsService.report(name: analyticsTag, event: .open, screen: analyticsScreenName, item: nil)
     }
     
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        stopTypingFromSearchBar()
+    }
+    
     deinit {
         analyticsService.report(name: analyticsTag, event: .close, screen: analyticsScreenName, item: nil)
     }
@@ -294,7 +298,14 @@ final class TrackerViewController: UIViewController {
         
         let navBar = UINavigationController(rootViewController: filterViewController)
         
+        stopTypingFromSearchBar()
         self.present(navBar, animated: true)
+    }
+    
+    private func stopTypingFromSearchBar() {
+        guard let searchController = navigationItem.searchController else { return }
+        searchController.searchBar.endEditing(true)
+        searchController.searchBar.resignFirstResponder()
     }
     
     private func showTrackersArrayIsEmpty() {
@@ -339,6 +350,8 @@ final class TrackerViewController: UIViewController {
         let navigationBar = UINavigationController(rootViewController: trackerCreator)
         
         analyticsService.report(name: analyticsTag, event: .click, screen: analyticsScreenName, item: .add_track)
+        
+        self.stopTypingFromSearchBar()
         modalPresentationStyle = .popover
         
         present(navigationBar, animated: true)
@@ -561,6 +574,8 @@ extension TrackerViewController: TrackerViewCollectionHelperDelegate {
         
         let trackerController = TrackerCreatorController(trackerCreatorType: isRegular ? .regular : .unRegular, creatorMode: .edit, trackerId: trackerId, streakCount: streakCount, delegate: self)
         
+        stopTypingFromSearchBar()
+        
         let navBar = UINavigationController(rootViewController: trackerController)
         present(navBar, animated: true)
     }
@@ -602,7 +617,6 @@ extension TrackerViewController: FilterDelegate {
 
 extension TrackerViewController: TrackerCreatorControllerDelegate {
     func trackerWasCreated() {
-        self.dismiss(animated: true)
         reloadCollection(date: selectedDate)
     }
 }

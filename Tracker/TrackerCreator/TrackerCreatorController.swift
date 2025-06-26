@@ -329,6 +329,7 @@ final class TrackerCreatorController: UIViewController {
         
         setButtonsView(spaceBetweenButtons: 8)
         
+        checkToAllowCreateButton()
     }
     
     private func getDayCountString(number: Int) -> String {
@@ -562,6 +563,8 @@ final class TrackerCreatorController: UIViewController {
             trackerStorage?.updateTracker(tracker: tracker, newCategory: categoryPicked == trackerOldCategory ? nil : categoryPicked )
         }
         delegate?.trackerWasCreated()
+        
+        self.dismiss(animated: true)
     }
 }
 

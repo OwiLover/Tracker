@@ -108,6 +108,7 @@ final class CategoryPickerViewController: UIViewController {
         }
         
         let array = viewModel.categoriesArray
+        
         !array.isEmpty ? showCategoryTableView() : showCategoriesAreEmpty()
         
         tableViewHelper = CustomTableViewHelper(tableView: categoryTableView, elements: array, delegate: self, accessoryType: .checkmark)

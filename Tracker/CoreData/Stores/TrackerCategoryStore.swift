@@ -73,6 +73,34 @@ final class TrackerCategoryStore: NSObject, TrackerCategoryStoreProtocol {
         return result
     }
     
+    var fetchedElementsWithoutPinned: [TrackerCategory] {
+        guard let elements = fetchController?.fetchedObjects else { return [] }
+        
+        var result: [TrackerCategory] = elements.compactMap { element in
+            guard let category = element.category, let trackers = element.trackers else { assertionFailure("Can't convert something in TrackerCategory!")
+                return nil
+            }
+            
+            let marshal = ColorMarshal()
+            
+            let trackerArrayCD = trackers.allObjects as? [TrackerCoreData] ?? []
+            
+            let trackerArray: [Tracker] = trackerArrayCD.compactMap { trackerCD in
+                guard let id = trackerCD.id, let name = trackerCD.name,
+                      let color = trackerCD.color, let emoji = trackerCD.emoji,
+                      let schedule = trackerCD.schedule else { fatalError("Can't convert TrackerCD to normal data!")
+                }
+                let tracker = Tracker(id: id, name: name, color: marshal.getUIColorFromHex(hex: color), emoji: emoji, schedule: schedule, isPinned: trackerCD.isPinned)
+
+                return tracker
+            }
+            
+            return TrackerCategory(category: category, array: trackerArray)
+        }
+
+        return result
+    }
+    
     private(set) var context: NSManagedObjectContext?
     private let fetchController: NSFetchedResultsController<TrackerCategoryCoreData>?
     
@@ -124,7 +152,7 @@ final class TrackerCategoryStore: NSObject, TrackerCategoryStoreProtocol {
     }
     
     func getCategoriesNames() -> [String] {
-        fetchedElements.map { $0.category }
+        fetchedElementsWithoutPinned.map { $0.category }
     }
     
     func addNewCategory(category: TrackerCategory) throws {
