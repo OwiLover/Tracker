@@ -130,7 +130,7 @@ final class StatsViewController: UIViewController {
         
         NSLayoutConstraint.activate([
             emptyStatsStackView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
-            emptyStatsStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -(searchBarHeight/2)),
+            emptyStatsStackView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor, constant: -(searchBarHeight/2)),
             emptyStatsStackView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             emptyStatsStackView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             emptyStatsImageView.widthAnchor.constraint(equalToConstant: 80),
